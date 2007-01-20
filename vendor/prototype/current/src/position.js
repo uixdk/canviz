@@ -44,7 +44,8 @@ var Position = {
       valueL += element.offsetLeft || 0;
       element = element.offsetParent;
       if (element) {
-        p = Element.getStyle(element, 'position');
+        if(element.tagName=='BODY') break;
+        var p = Element.getStyle(element, 'position');
         if (p == 'relative' || p == 'absolute') break;
       }
     } while (element);
@@ -100,17 +101,6 @@ var Position = {
         element.offsetWidth;
   },
 
-  clone: function(source, target) {
-    source = $(source);
-    target = $(target);
-    target.style.position = 'absolute';
-    var offsets = this.cumulativeOffset(source);
-    target.style.top    = offsets[1] + 'px';
-    target.style.left   = offsets[0] + 'px';
-    target.style.width  = source.offsetWidth + 'px';
-    target.style.height = source.offsetHeight + 'px';
-  },
-
   page: function(forElement) {
     var valueT = 0, valueL = 0;
 
@@ -127,8 +117,10 @@ var Position = {
 
     element = forElement;
     do {
-      valueT -= element.scrollTop  || 0;
-      valueL -= element.scrollLeft || 0;    
+      if (!window.opera || element.tagName=='BODY') {
+        valueT -= element.scrollTop  || 0;
+        valueL -= element.scrollLeft || 0;
+      }
     } while (element = element.parentNode);
 
     return [valueL, valueT];
@@ -189,10 +181,10 @@ var Position = {
     element._originalHeight = element.style.height;
 
     element.style.position = 'absolute';
-    element.style.top    = top + 'px';;
-    element.style.left   = left + 'px';;
-    element.style.width  = width + 'px';;
-    element.style.height = height + 'px';;
+    element.style.top    = top + 'px';
+    element.style.left   = left + 'px';
+    element.style.width  = width + 'px';
+    element.style.height = height + 'px';
   },
 
   relativize: function(element) {

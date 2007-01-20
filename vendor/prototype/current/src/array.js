@@ -4,7 +4,7 @@ var $A = Array.from = function(iterable) {
     return iterable.toArray();
   } else {
     var results = [];
-    for (var i = 0; i < iterable.length; i++)
+    for (var i = 0, length = iterable.length; i < length; i++)
       results.push(iterable[i]);
     return results;
   }
@@ -12,11 +12,12 @@ var $A = Array.from = function(iterable) {
 
 Object.extend(Array.prototype, Enumerable);
 
-Array.prototype._reverse = Array.prototype.reverse;
+if (!Array.prototype._reverse)
+  Array.prototype._reverse = Array.prototype.reverse;
 
 Object.extend(Array.prototype, {
   _each: function(iterator) {
-    for (var i = 0; i < this.length; i++)
+    for (var i = 0, length = this.length; i < length; i++)
       iterator(this[i]);
   },
   
@@ -35,13 +36,13 @@ Object.extend(Array.prototype, {
   
   compact: function() {
     return this.select(function(value) {
-      return value != undefined || value != null;
+      return value != null;
     });
   },
   
   flatten: function() {
     return this.inject([], function(array, value) {
-      return array.concat(value.constructor == Array ?
+      return array.concat(value && value.constructor == Array ?
         value.flatten() : [value]);
     });
   },
@@ -54,7 +55,7 @@ Object.extend(Array.prototype, {
   },
   
   indexOf: function(object) {
-    for (var i = 0; i < this.length; i++)
+    for (var i = 0, length = this.length; i < length; i++)
       if (this[i] == object) return i;
     return -1;
   },
@@ -63,15 +64,48 @@ Object.extend(Array.prototype, {
     return (inline !== false ? this : this.toArray())._reverse();
   },
   
-  shift: function() {
-    var result = this[0];
-    for (var i = 0; i < this.length - 1; i++)
-      this[i] = this[i + 1];
-    this.length--;
-    return result;
+  reduce: function() {
+    return this.length > 1 ? this : this[0];
   },
-
+  
+  uniq: function() {
+    return this.inject([], function(array, value) {
+      return array.include(value) ? array : array.concat([value]);
+    });
+  },
+  
+  clone: function() {
+    return [].concat(this);
+  },
+  
+  size: function() {
+    return this.length;
+  },
+  
   inspect: function() {
     return '[' + this.map(Object.inspect).join(', ') + ']';
   }
 });
+
+Array.prototype.toArray = Array.prototype.clone;
+
+function $w(string){
+  string = string.strip();
+  return string ? string.split(/\s+/) : [];
+}
+
+if(window.opera){
+  Array.prototype.concat = function(){
+    var array = [];
+    for(var i = 0, length = this.length; i < length; i++) array.push(this[i]);
+    for(var i = 0, length = arguments.length; i < length; i++) {
+      if(arguments[i].constructor == Array) {
+        for(var j = 0, arrayLength = arguments[i].length; j < arrayLength; j++) 
+          array.push(arguments[i][j]);
+      } else { 
+        array.push(arguments[i]);
+      }
+    }
+    return array;
+  }
+}

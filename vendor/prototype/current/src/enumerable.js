@@ -15,6 +15,14 @@ var Enumerable = {
     } catch (e) {
       if (e != $break) throw e;
     }
+    return this;
+  },
+  
+  eachSlice: function(number, iterator) {
+    var index = -number, slices = [], array = this.toArray();
+    while ((index += number) < array.length)
+      slices.push(array.slice(index, index+number));
+    return slices.map(iterator);
   },
   
   all: function(iterator) {
@@ -27,7 +35,7 @@ var Enumerable = {
   },
   
   any: function(iterator) {
-    var result = true;
+    var result = false;
     this.each(function(value, index) {
       if (result = !!(iterator || Prototype.K)(value, index)) 
         throw $break;
@@ -38,12 +46,12 @@ var Enumerable = {
   collect: function(iterator) {
     var results = [];
     this.each(function(value, index) {
-      results.push(iterator(value, index));
+      results.push((iterator || Prototype.K)(value, index));
     });
     return results;
   },
   
-  detect: function (iterator) {
+  detect: function(iterator) {
     var result;
     this.each(function(value, index) {
       if (iterator(value, index)) {
@@ -84,6 +92,14 @@ var Enumerable = {
     return found;
   },
   
+  inGroupsOf: function(number, fillWith) {
+    fillWith = fillWith === undefined ? null : fillWith;
+    return this.eachSlice(number, function(slice) {
+      while(slice.length < number) slice.push(fillWith);
+      return slice;
+    });
+  },
+  
   inject: function(memo, iterator) {
     this.each(function(value, index) {
       memo = iterator(memo, value, index);
@@ -93,7 +109,7 @@ var Enumerable = {
   
   invoke: function(method) {
     var args = $A(arguments).slice(1);
-    return this.collect(function(value) {
+    return this.map(function(value) {
       return value[method].apply(value, args);
     });
   },
@@ -102,7 +118,7 @@ var Enumerable = {
     var result;
     this.each(function(value, index) {
       value = (iterator || Prototype.K)(value, index);
-      if (value >= (result || value))
+      if (result == undefined || value >= result)
         result = value;
     });
     return result;
@@ -112,7 +128,7 @@ var Enumerable = {
     var result;
     this.each(function(value, index) {
       value = (iterator || Prototype.K)(value, index);
-      if (value <= (result || value))
+      if (result == undefined || value < result)
         result = value;
     });
     return result;
@@ -145,7 +161,7 @@ var Enumerable = {
   },
   
   sortBy: function(iterator) {
-    return this.collect(function(value, index) {
+    return this.map(function(value, index) {
       return {value: value, criteria: iterator(value, index)};
     }).sort(function(left, right) {
       var a = left.criteria, b = right.criteria;
@@ -154,7 +170,7 @@ var Enumerable = {
   },
   
   toArray: function() {
-    return this.collect(Prototype.K);
+    return this.map();
   },
   
   zip: function() {
@@ -164,9 +180,12 @@ var Enumerable = {
 
     var collections = [this].concat(args).map($A);
     return this.map(function(value, index) {
-      iterator(value = collections.pluck(index));
-      return value;
+      return iterator(collections.pluck(index));
     });
+  },
+  
+  size: function() {
+    return this.toArray().length;
   },
   
   inspect: function() {

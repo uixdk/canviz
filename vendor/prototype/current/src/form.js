@@ -1,198 +1,209 @@
-var Field = {
-  clear: function() {
-    for (var i = 0; i < arguments.length; i++)
-      $(arguments[i]).value = '';
-  },
-
-  focus: function(element) {
-    $(element).focus();
-  },
-  
-  present: function() {
-    for (var i = 0; i < arguments.length; i++)
-      if ($(arguments[i]).value == '') return false;
-    return true;
-  },
-  
-  select: function(element) {
-    $(element).select();
-  },
-   
-  activate: function(element) {
-    element = $(element);
-    element.focus();
-    if (element.select)
-      element.select();
-  }
-}
-
-/*--------------------------------------------------------------------------*/
-
 var Form = {
-  serialize: function(form) {
-    var elements = Form.getElements($(form));
-    var queryComponents = new Array();
+  reset: function(form) {
+    $(form).reset();
+    return form;
+  },
+  
+  serializeElements: function(elements, getHash) {
+    var data = elements.inject({}, function(result, element) {
+      if (!element.disabled && element.name) {
+        var key = element.name, value = $(element).getValue();
+        if (value != undefined) {
+          if (result[key]) {
+            if (result[key].constructor != Array) result[key] = [result[key]];
+            result[key].push(value);
+          }
+          else result[key] = value;
+        }
+      }
+      return result;
+    });
     
-    for (var i = 0; i < elements.length; i++) {
-      var queryComponent = Form.Element.serialize(elements[i]);
-      if (queryComponent)
-        queryComponents.push(queryComponent);
-    }
-    
-    return queryComponents.join('&');
+    return getHash ? data : Hash.toQueryString(data);
+  }
+};
+
+Form.Methods = {
+  serialize: function(form, getHash) {
+    return Form.serializeElements(Form.getElements(form), getHash);
   },
   
   getElements: function(form) {
-    form = $(form);
-    var elements = new Array();
-
-    for (tagName in Form.Element.Serializers) {
-      var tagElements = form.getElementsByTagName(tagName);
-      for (var j = 0; j < tagElements.length; j++)
-        elements.push(tagElements[j]);
-    }
-    return elements;
+    return $A($(form).getElementsByTagName('*')).inject([], 
+      function(elements, child) {
+        if (Form.Element.Serializers[child.tagName.toLowerCase()])
+          elements.push(Element.extend(child));
+        return elements;
+      }
+    );
   },
   
   getInputs: function(form, typeName, name) {
     form = $(form);
     var inputs = form.getElementsByTagName('input');
     
-    if (!typeName && !name)
-      return inputs;
+    if (!typeName && !name) return $A(inputs).map(Element.extend);
       
-    var matchingInputs = new Array();
-    for (var i = 0; i < inputs.length; i++) {
+    for (var i = 0, matchingInputs = [], length = inputs.length; i < length; i++) {
       var input = inputs[i];
-      if ((typeName && input.type != typeName) ||
-          (name && input.name != name)) 
+      if ((typeName && input.type != typeName) || (name && input.name != name))
         continue;
-      matchingInputs.push(input);
+      matchingInputs.push(Element.extend(input));
     }
 
     return matchingInputs;
   },
 
   disable: function(form) {
-    var elements = Form.getElements(form);
-    for (var i = 0; i < elements.length; i++) {
-      var element = elements[i];
+    form = $(form);
+    form.getElements().each(function(element) {
       element.blur();
       element.disabled = 'true';
-    }
+    });
+    return form;
   },
 
   enable: function(form) {
-    var elements = Form.getElements(form);
-    for (var i = 0; i < elements.length; i++) {
-      var element = elements[i];
+    form = $(form);
+    form.getElements().each(function(element) {
       element.disabled = '';
-    }
+    });
+    return form;
   },
 
   findFirstElement: function(form) {
-    return Form.getElements(form).find(function(element) {
+    return $(form).getElements().find(function(element) {
       return element.type != 'hidden' && !element.disabled &&
         ['input', 'select', 'textarea'].include(element.tagName.toLowerCase());
     });
   },
 
   focusFirstElement: function(form) {
-    Field.activate(Form.findFirstElement(form));
-  },
-
-  reset: function(form) {
-    $(form).reset();
+    form = $(form);
+    form.findFirstElement().activate();
+    return form;
   }
 }
 
+Object.extend(Form, Form.Methods);
+
+/*--------------------------------------------------------------------------*/
+
 Form.Element = {
+  focus: function(element) {
+    $(element).focus();
+    return element;
+  },
+
+  select: function(element) {
+    $(element).select();
+    return element;
+  }
+}
+
+Form.Element.Methods = {
   serialize: function(element) {
     element = $(element);
-    var method = element.tagName.toLowerCase();
-    var parameter = Form.Element.Serializers[method](element);
-    
-    if (parameter) {
-      var key = encodeURIComponent(parameter[0]);
-      if (key.length == 0) return;
-      
-      if (parameter[1].constructor != Array)
-        parameter[1] = [parameter[1]];
-      
-      return parameter[1].map(function(value) {
-        return key + '=' + encodeURIComponent(value);
-      }).join('&');
+    if (!element.disabled && element.name) {
+      var value = element.getValue();
+      if (value != undefined) {
+        var pair = {};
+        pair[element.name] = value;
+        return Hash.toQueryString(pair);
+      }
     }
+    return '';
   },
   
   getValue: function(element) {
     element = $(element);
     var method = element.tagName.toLowerCase();
-    var parameter = Form.Element.Serializers[method](element);
-    
-    if (parameter)
-      return parameter[1];
+    return Form.Element.Serializers[method](element);
+  },
+
+  clear: function(element) {
+    $(element).value = '';
+    return element;
+  },
+
+  present: function(element) {
+    return $(element).value != '';
+  },
+  
+  activate: function(element) {
+    element = $(element);
+    element.focus();
+    if (element.select && ( element.tagName.toLowerCase() != 'input' ||
+      !['button', 'reset', 'submit'].include(element.type) ) )
+      element.select();
+    return element;
+  },
+  
+  disable: function(element) {
+    element = $(element);
+    element.disabled = true;
+    return element;
+  },
+  
+  enable: function(element) {
+    element = $(element);
+    element.blur();
+    element.disabled = false;
+    return element;
   }
 }
+
+Object.extend(Form.Element, Form.Element.Methods);
+var Field = Form.Element;
+var $F = Form.Element.getValue;
+
+/*--------------------------------------------------------------------------*/
 
 Form.Element.Serializers = {
   input: function(element) {
     switch (element.type.toLowerCase()) {
-      case 'submit':
-      case 'hidden':
-      case 'password':
-      case 'text':
-        return Form.Element.Serializers.textarea(element);
       case 'checkbox':  
       case 'radio':
         return Form.Element.Serializers.inputSelector(element);
+      default:
+        return Form.Element.Serializers.textarea(element);
     }
-    return false;
   },
 
   inputSelector: function(element) {
-    if (element.checked)
-      return [element.name, element.value];
+    return element.checked ? element.value : null;
   },
 
   textarea: function(element) {
-    return [element.name, element.value];
+    return element.value;
   },
   
   select: function(element) {
-    return Form.Element.Serializers[element.type == 'select-one' ? 
+    return this[element.type == 'select-one' ? 
       'selectOne' : 'selectMany'](element);
   },
   
   selectOne: function(element) {
-    var value = '', opt, index = element.selectedIndex;
-    if (index >= 0) {
-      opt = element.options[index];
-      value = opt.value;
-      if (!value && !('value' in opt))
-        value = opt.text;
-    }
-    return [element.name, value];
+    var index = element.selectedIndex;
+    return index >= 0 ? this.optionValue(element.options[index]) : null;
   },
   
   selectMany: function(element) {
-    var value = new Array();
-    for (var i = 0; i < element.length; i++) {
+    var values, length = element.length;
+    if (!length) return null;
+    
+    for (var i = 0, values = []; i < length; i++) {
       var opt = element.options[i];
-      if (opt.selected) {
-        var optValue = opt.value;
-        if (!optValue && !('value' in opt))
-          optValue = opt.text;
-        value.push(optValue);
-      }
+      if (opt.selected) values.push(this.optionValue(opt));
     }
-    return [element.name, value];
+    return values;
+  },
+  
+  optionValue: function(opt) {
+    // extend element because hasAttribute may not be native
+    return Element.extend(opt).hasAttribute('value') ? opt.value : opt.text;
   }
 }
-
-/*--------------------------------------------------------------------------*/
-
-var $F = Form.Element.getValue;
 
 /*--------------------------------------------------------------------------*/
 
@@ -213,7 +224,9 @@ Abstract.TimedObserver.prototype = {
   
   onTimerEvent: function() {
     var value = this.getValue();
-    if (this.lastValue != value) {
+    var changed = ('string' == typeof this.lastValue && 'string' == typeof value
+      ? this.lastValue != value : String(this.lastValue) != String(value));
+    if (changed) {
       this.callback(this.element, value);
       this.lastValue = value;
     }
@@ -258,9 +271,7 @@ Abstract.EventObserver.prototype = {
   },
   
   registerFormCallbacks: function() {
-    var elements = Form.getElements(this.element);
-    for (var i = 0; i < elements.length; i++)
-      this.registerCallback(elements[i]);
+    Form.getElements(this.element).each(this.registerCallback.bind(this));
   },
   
   registerCallback: function(element) {
@@ -270,11 +281,7 @@ Abstract.EventObserver.prototype = {
         case 'radio':
           Event.observe(element, 'click', this.onElementEvent.bind(this));
           break;
-        case 'password':
-        case 'text':
-        case 'textarea':
-        case 'select-one':
-        case 'select-multiple':
+        default:
           Event.observe(element, 'change', this.onElementEvent.bind(this));
           break;
       }

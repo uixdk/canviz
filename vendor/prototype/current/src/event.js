@@ -12,6 +12,10 @@ Object.extend(Event, {
   KEY_RIGHT:    39,
   KEY_DOWN:     40,
   KEY_DELETE:   46,
+  KEY_HOME:     36,
+  KEY_END:      35,
+  KEY_PAGEUP:   33,
+  KEY_PAGEDOWN: 34,
 
   element: function(event) {
     return event.target || event.srcElement;
@@ -67,7 +71,7 @@ Object.extend(Event, {
   
   unloadCache: function() {
     if (!Event.observers) return;
-    for (var i = 0; i < Event.observers.length; i++) {
+    for (var i = 0, length = Event.observers.length; i < length; i++) {
       Event.stopObserving.apply(this, Event.observers[i]);
       Event.observers[i][0] = null;
     }
@@ -75,7 +79,7 @@ Object.extend(Event, {
   },
 
   observe: function(element, name, observer, useCapture) {
-    var element = $(element);
+    element = $(element);
     useCapture = useCapture || false;
     
     if (name == 'keypress' &&
@@ -83,11 +87,11 @@ Object.extend(Event, {
         || element.attachEvent))
       name = 'keydown';
     
-    this._observeAndCache(element, name, observer, useCapture);
+    Event._observeAndCache(element, name, observer, useCapture);
   },
 
   stopObserving: function(element, name, observer, useCapture) {
-    var element = $(element);
+    element = $(element);
     useCapture = useCapture || false;
     
     if (name == 'keypress' &&
@@ -98,10 +102,13 @@ Object.extend(Event, {
     if (element.removeEventListener) {
       element.removeEventListener(name, observer, useCapture);
     } else if (element.detachEvent) {
-      element.detachEvent('on' + name, observer);
+      try { 
+        element.detachEvent('on' + name, observer); 
+      } catch (e) {}
     }
   }
 });
 
 /* prevent memory leaks in IE */
-Event.observe(window, 'unload', Event.unloadCache, false);
+if (navigator.appVersion.match(/\bMSIE\b/))
+  Event.observe(window, 'unload', Event.unloadCache, false);

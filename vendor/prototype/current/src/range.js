@@ -9,10 +9,10 @@ Object.extend(ObjectRange.prototype, {
   
   _each: function(iterator) {
     var value = this.start;
-    do {
+    while (this.include(value)) {
       iterator(value);
       value = value.succ();
-    } while (this.include(value));
+    }
   },
   
   include: function(value) {
