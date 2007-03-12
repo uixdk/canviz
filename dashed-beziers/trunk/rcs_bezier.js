@@ -6,6 +6,10 @@ Point.prototype = {
 		this.x = x;
 		this.y = y;
 	},
+	offset: function(dx, dy) {
+		this.x += dx;
+		this.y += dy;
+	},
 	add: function(point) {
 		return new Point(this.x + point.x, this.y + point.y);
 	},
@@ -28,6 +32,21 @@ Bezier.prototype = {
 	initialize: function(points) {
 		this.points = points;
 		this.order = points.length;
+	},
+	reset: function() {
+		with (Bezier.prototype) {
+			this.controlPolygonLength = controlPolygonLength;
+			this.chordLength = chordLength;
+			this.triangle = triangle;
+			this.chordPoints = chordPoints;
+			this.coefficients = coefficients;
+		}
+	},
+	offset: function(dx, dy) {
+		this.points.each(function(point) {
+			point.offset(dx, dy);
+		});
+		this.reset();
 	},
 	// Based on Oliver Steele's bezier.js library.
 	controlPolygonLength: function() {
@@ -137,7 +156,7 @@ Bezier.prototype = {
 	markedEvery: function(distance, firstDistance) {
 		var nextDistance = firstDistance || distance;
 		var segments = this.chordPoints();
-		var times = [0];
+		var times = [];
 		var t = 0; // time
 		var dt; // delta t
 		var segment;
@@ -145,30 +164,24 @@ Bezier.prototype = {
 		for (var i = 1; i < segments.length; ++i) {
 			segment = segments[i];
 			segment.length = segment.p.distanceFrom(segments[i - 1].p);
-//			$('output').innerHTML += 't [' + segment.tStart + ',' + segment.tEnd + '] segment length ' + segment.length + '<br/>';
 			if (0 == segment.length) {
 				t += segment.dt;
 			} else {
 				dt = nextDistance / segment.length * segment.dt;
-//				$('output').innerHTML += 'nextDistance=' + nextDistance + ', dt=' + dt + '<br/>';
 				segment.remainingLength = segment.length;
 				while (segment.remainingLength >= nextDistance) {
 					segment.remainingLength -= nextDistance;
 					t += dt;
-//					$('output').innerHTML += 'pushing t=' + t + '<br/>';
 					times.push(t);
 					if (distance != nextDistance) {
 						nextDistance = distance;
 						dt = nextDistance / segment.length * segment.dt;
-//						$('output').innerHTML += 'nextDistance=' + nextDistance + ', dt=' + dt + '<br/>';
 					}
 				}
-//				$('output').innerHTML += 'remainingLength=' + segment.remainingLength + '<br/>';
 				nextDistance -= segment.remainingLength;
 				t = segment.tEnd;
 			}
 		}
-//		$('output').innerHTML += '<hr/>';
 		return {times: times, nextDistance: nextDistance};
 	},
 	// Return the coefficients of the polynomials for x and y in t.
@@ -264,29 +277,62 @@ Bezier.prototype = {
 			this.bezierCurveTo(x1, y1, x2, y2, x3, y3);
 		}
 	],
-	drawAndStroke: function(ctx) {
-		ctx.beginPath();
-		this.draw(ctx);
-		ctx.stroke();
-	},
-	drawAndStrokeDashed: function(ctx, dashLength) {
-		ctx.beginPath();
-		var markedEvery = this.markedEvery(dashLength);
-		if (markedEvery.times.length % 2) markedEvery.times.push(1);
+	drawDashed: function(ctx, dashLength, firstDistance, drawFirst) {
+		if (!firstDistance) firstDistance = dashLength;
+		if ('undefined' == typeof drawFirst) drawFirst = true;
+		var markedEvery = this.markedEvery(dashLength, firstDistance);
+		if (drawFirst) markedEvery.times.unshift(0);
+		var drawLast = (markedEvery.times.length % 2);
+		if (drawLast) markedEvery.times.push(1);
 		for (var i = 1; i < markedEvery.times.length; i += 2) {
 			this.mid(markedEvery.times[i - 1], markedEvery.times[i]).draw(ctx);
 		}
-		ctx.stroke();
+		return {firstDistance: markedEvery.nextDistance, drawFirst: drawLast};
 	},
-	drawAndStrokeDotted: function(ctx, dotSpacing) {
-		ctx.beginPath();
-		var oldLineCap = ctx.lineCap;
-		ctx.lineCap = 'round';
-		var markedEvery = this.markedEvery(dotSpacing);
+	drawDotted: function(ctx, dotSpacing, firstDistance) {
+		if (!firstDistance) firstDistance = dotSpacing;
+		var markedEvery = this.markedEvery(dotSpacing, firstDistance);
+		if (dotSpacing == firstDistance) markedEvery.times.unshift(0);
 		markedEvery.times.each(function(t) {
 			this.pointAtT(t).draw(ctx);
 		}.bind(this));
-		ctx.stroke();
-		ctx.lineCap = oldLineCap;
+		return markedEvery.nextDistance;
+	}
+}
+
+Path = Class.create();
+Path.prototype = {
+	initialize: function(segments) {
+		this.segments = segments || [];
+	},
+	// Based on Oliver Steele's bezier.js library.
+	addBezier: function(pointsOrBezier) {
+		this.segments.push(pointsOrBezier instanceof Array ? new Bezier(pointsOrBezier) : pointsOrBezier);
+	},
+	offset: function(dx, dy) {
+		this.segments.each(function(segment) {
+			segment.offset(dx, dy);
+		});
+	},
+	// Based on Oliver Steele's bezier.js library.
+	draw: function(ctx) {
+		this.segments.each(function(segment) {
+			segment.draw(ctx);
+		});
+	},
+	drawDashed: function(ctx, dashLength, firstDistance, drawFirst) {
+		var info = {
+			drawFirst: ('undefined' == typeof drawFirst) ? true : drawFirst,
+			firstDistance: firstDistance || dashLength
+		};
+		this.segments.each(function(segment) {
+			info = segment.drawDashed(ctx, dashLength, info.firstDistance, info.drawFirst);
+		});
+	},
+	drawDotted: function(ctx, dotSpacing, firstDistance) {
+		if (!firstDistance) firstDistance = dotSpacing;
+		this.segments.each(function(segment) {
+			firstDistance = segment.drawDotted(ctx, dotSpacing, firstDistance);
+		});
 	}
 }
