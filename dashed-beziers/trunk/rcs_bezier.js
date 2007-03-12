@@ -10,12 +10,6 @@ Point.prototype = {
 		this.x += dx;
 		this.y += dy;
 	},
-	add: function(point) {
-		return new Point(this.x + point.x, this.y + point.y);
-	},
-	multiply: function(mult) {
-		return new Point(this.x * mult, this.y * mult);
-	},
 	distanceFrom: function(point) {
 		var dx = this.x - point.x;
 		var dy = this.y - point.y;
@@ -77,60 +71,40 @@ Bezier.prototype = {
 		}
 		return (this.triangle = function() {return m;})();
 	},
+	// Based on Oliver Steele's bezier.js library.
+	triangleAtT: function(t) {
+		var s = 1 - t;
+		var upper = this.points;
+		var m = [upper]
+		for (var i = 1; i < this.order; ++i) {
+			var lower = [];
+			for (var j = 0; j < this.order - i; ++j) {
+				var c0 = upper[j];
+				var c1 = upper[j + 1];
+				lower[j] = new Point(c0.x * s + c1.x * t, c0.y * s + c1.y * t);
+			}
+			m.push(lower);
+			upper = lower;
+		}
+		return m;
+	},
 	// Returns two beziers resulting from splitting this bezier at t=0.5.
 	// Based on Oliver Steele's bezier.js library.
-	split: function() {
-		var m = this.triangle();
+	split: function(t) {
+		if ('undefined' == typeof t) t = 0.5;
+		var m = (0.5 == t) ? this.triangle() : this.triangleAtT(t);
 		var leftPoints  = new Array(this.order);
 		var rightPoints = new Array(this.order);
 		for (var i = 0; i < this.order; ++i) {
 			leftPoints[i]  = m[i][0];
 			rightPoints[i] = m[this.order - 1 - i][i];
 		}
-		return [new Bezier(leftPoints), new Bezier(rightPoints)];
-	},
-	// Returns a bezier which is the left portion of this bezier cut at t.
-	// Based on the algorithm in LBezier::TSplit by Llew S. Goodstadt.
-	left: function(t) {
-		// Don't know how to generalize this yet.
-		if (4 != this.order) return;
-		
-		var s = 1 - t;
-		var ss = s * s;
-		var tt = t * t;
-		
-		var p = new Array(this.order);
-		
-		p[0] = this.points[0];
-		p[1] = this.points[0].multiply(s     ).add(this.points[1].multiply(t         ));
-		p[2] = this.points[0].multiply(ss    ).add(this.points[1].multiply(s  * t * 2)).add(this.points[2].multiply(tt        ));
-		p[3] = this.points[0].multiply(s * ss).add(this.points[1].multiply(ss * t * 3)).add(this.points[2].multiply(s * tt * 3)).add(this.points[3].multiply(t * tt));
-		
-		return new Bezier(p);
-	},
-	// Returns a bezier which is the right portion of this bezier cut at t.
-	// Based on the algorithm in LBezier::TSplit by Llew S. Goodstadt.
-	right: function(t) {
-		// Don't know how to generalize this yet.
-		if (4 != this.order) return;
-		
-		var s = 1 - t;
-		var ss = s * s;
-		var tt = t * t;
-		
-		var p = new Array(this.order);
-		
-		p[0] = this.points[0].multiply(s * ss).add(this.points[1].multiply(ss * t * 3)).add(this.points[2].multiply(s * tt * 3)).add(this.points[3].multiply(t * tt));
-		p[1] = this.points[1].multiply(ss    ).add(this.points[2].multiply(s  * t * 2)).add(this.points[3].multiply(tt        ));
-		p[2] = this.points[2].multiply(s     ).add(this.points[3].multiply(t         ));
-		p[3] = this.points[3];
-		
-		return new Bezier(p);
+		return {left: new Bezier(leftPoints), right: new Bezier(rightPoints)};
 	},
 	// Returns a bezier which is the portion of this bezier from t1 to t2.
 	// Thanks to Peter Zin on comp.graphics.algorithms.
 	mid: function(t1, t2) {
-		return this.left(t2).right(t1 / t2);
+		return this.split(t2).left.split(t1 / t2).right;
 	},
 	// Returns points (and their corresponding times in the bezier) that form
 	// an approximate polygonal representation of the bezier.
@@ -147,12 +121,12 @@ Bezier.prototype = {
 		} else {
 			var tMid = tStart + dt / 2;
 			var halves = this.split();
-			return halves[0]._chordPoints(tStart, tMid).concat(halves[1]._chordPoints(tMid, tEnd));
+			return halves.left._chordPoints(tStart, tMid).concat(halves.right._chordPoints(tMid, tEnd));
 		}
 	},
 	// Returns an array of times between 0 and 1 that mark the bezier evenly
 	// in space.
-	// Based on the algorithm described in Jeremy Gibbons' dashed.ps.gz
+	// Based in part on the algorithm described in Jeremy Gibbons' dashed.ps.gz
 	markedEvery: function(distance, firstDistance) {
 		var nextDistance = firstDistance || distance;
 		var segments = this.chordPoints();
@@ -224,7 +198,7 @@ Bezier.prototype = {
 		var result = {xs: collapse(xps), ys: collapse(yps)};
 		return (this.coefficients = function() {return result;})();
 	},
-	// Return the point at point t.
+	// Return the point at time t.
 	// From Oliver Steele's bezier.js library.
 	pointAtT: function(t) {
 		var c = this.coefficients();
