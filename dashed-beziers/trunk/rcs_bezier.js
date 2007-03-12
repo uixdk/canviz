@@ -220,8 +220,9 @@ Bezier.prototype = {
 	},
 	// Render the Bezier to a WHATWG 2D canvas context.
 	// Based on Oliver Steele's bezier.js library.
-	draw: function (ctx) {
-		ctx.moveTo(this.points[0].x, this.points[0].y);
+	draw: function (ctx, moveTo) {
+		if ('undefined' == typeof moveTo) moveTo = true;
+		if (moveTo) ctx.moveTo(this.points[0].x, this.points[0].y);
 		var fn = this.drawCommands[this.order];
 		if (fn) {
 			var coords = [];
@@ -290,8 +291,10 @@ Path.prototype = {
 	},
 	// Based on Oliver Steele's bezier.js library.
 	draw: function(ctx) {
+		var moveTo = true;
 		this.segments.each(function(segment) {
-			segment.draw(ctx);
+			segment.draw(ctx, moveTo);
+			moveTo = false;
 		});
 	},
 	drawDashed: function(ctx, dashLength, firstDistance, drawFirst) {
