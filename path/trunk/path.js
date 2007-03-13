@@ -1,4 +1,4 @@
-// rcs_bezier.js
+// $Id$
 
 Point = Class.create();
 Point.prototype = {
