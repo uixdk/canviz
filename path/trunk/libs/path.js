@@ -313,3 +313,41 @@ Path.prototype = {
 		});
 	}
 }
+
+Ellipse = Class.create();
+Ellipse.prototype = new Path();
+Object.extend(Ellipse.prototype, {
+	KAPPA: 0.5522847498,
+	initialize: function(cx, cy, rx, ry) {
+		this.cx = cx; // center x
+		this.cy = cy; // center y
+		this.rx = rx; // radius x
+		this.ry = ry; // radius y
+		this.segments = [
+			new Bezier([
+				new Point(cx, cy - ry),
+				new Point(cx + this.KAPPA * rx, cy - ry),
+				new Point(cx + rx, cy - this.KAPPA * ry),
+				new Point(cx + rx, cy)
+			]),
+			new Bezier([
+				new Point(cx + rx, cy),
+				new Point(cx + rx, cy + this.KAPPA * ry),
+				new Point(cx + this.KAPPA * rx, cy + ry),
+				new Point(cx, cy + ry)
+			]),
+			new Bezier([
+				new Point(cx, cy + ry),
+				new Point(cx - this.KAPPA * rx, cy + ry),
+				new Point(cx - rx, cy + this.KAPPA * ry),
+				new Point(cx - rx, cy)
+			]),
+			new Bezier([
+				new Point(cx - rx, cy),
+				new Point(cx - rx, cy - this.KAPPA * ry),
+				new Point(cx - this.KAPPA * rx, cy - ry),
+				new Point(cx, cy - ry)
+			])
+		];
+	}
+});
