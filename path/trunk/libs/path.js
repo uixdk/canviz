@@ -1,6 +1,6 @@
 // $Id$
 
-Point = Class.create();
+var Point = Class.create();
 Point.prototype = {
 	initialize: function(x, y) {
 		this.x = x;
@@ -21,7 +21,7 @@ Point.prototype = {
 	}
 }
 
-Bezier = Class.create();
+var Bezier = Class.create();
 Bezier.prototype = {
 	initialize: function(points) {
 		this.points = points;
@@ -275,7 +275,7 @@ Bezier.prototype = {
 	}
 }
 
-Path = Class.create();
+var Path = Class.create();
 Path.prototype = {
 	initialize: function(segments) {
 		this.segments = segments || [];
@@ -314,7 +314,7 @@ Path.prototype = {
 	}
 }
 
-Ellipse = Class.create();
+var Ellipse = Class.create();
 Ellipse.prototype = new Path();
 Object.extend(Ellipse.prototype, {
 	KAPPA: 0.5522847498,
