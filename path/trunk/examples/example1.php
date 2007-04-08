@@ -15,6 +15,7 @@ header('Content-Type: text/html; charset=utf-8');
 	width: 8em;
 }
 --></style>
+	<!--[if IE]><script type="text/javascript" src="excanvas/excanvas.js"></script><![endif]-->
 	<script type="text/javascript" src="prototype/prototype.js"></script>
 	<script type="text/javascript" src="path/path.js"></script>
 	<script type="text/javascript"><!--
