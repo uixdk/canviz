@@ -8,8 +8,8 @@ var Form = {
     var data = elements.inject({}, function(result, element) {
       if (!element.disabled && element.name) {
         var key = element.name, value = $(element).getValue();
-        if (value != undefined) {
-          if (result[key]) {
+        if (value != null) { 
+         	if (key in result) {
             if (result[key].constructor != Array) result[key] = [result[key]];
             result[key].push(value);
           }
@@ -56,18 +56,13 @@ Form.Methods = {
 
   disable: function(form) {
     form = $(form);
-    form.getElements().each(function(element) {
-      element.blur();
-      element.disabled = 'true';
-    });
+    Form.getElements(form).invoke('disable');
     return form;
   },
 
   enable: function(form) {
     form = $(form);
-    form.getElements().each(function(element) {
-      element.disabled = '';
-    });
+    Form.getElements(form).invoke('enable');
     return form;
   },
 
@@ -82,10 +77,25 @@ Form.Methods = {
     form = $(form);
     form.findFirstElement().activate();
     return form;
+  },
+  
+  request: function(form, options) {
+    form = $(form), options = Object.clone(options || {});
+
+    var params = options.parameters;
+    options.parameters = form.serialize(true);
+    
+    if (params) {
+      if (typeof params == 'string') params = params.toQueryParams();
+      Object.extend(options.parameters, params);
+    }
+    
+    if (form.hasAttribute('method') && !options.method)
+      options.method = form.method;
+    
+    return new Ajax.Request(form.readAttribute('action'), options);
   }
 }
-
-Object.extend(Form, Form.Methods);
 
 /*--------------------------------------------------------------------------*/
 
@@ -132,30 +142,33 @@ Form.Element.Methods = {
   
   activate: function(element) {
     element = $(element);
-    element.focus();
-    if (element.select && ( element.tagName.toLowerCase() != 'input' ||
-      !['button', 'reset', 'submit'].include(element.type) ) )
-      element.select();
+    try {
+      element.focus();
+      if (element.select && (element.tagName.toLowerCase() != 'input' ||
+        !['button', 'reset', 'submit'].include(element.type)))
+        element.select();
+    } catch (e) {}
     return element;
   },
   
   disable: function(element) {
     element = $(element);
+    element.blur();
     element.disabled = true;
     return element;
   },
   
   enable: function(element) {
     element = $(element);
-    element.blur();
     element.disabled = false;
     return element;
   }
 }
 
-Object.extend(Form.Element, Form.Element.Methods);
+/*--------------------------------------------------------------------------*/
+
 var Field = Form.Element;
-var $F = Form.Element.getValue;
+var $F = Form.Element.Methods.getValue;
 
 /*--------------------------------------------------------------------------*/
 
@@ -302,4 +315,3 @@ Form.EventObserver.prototype = Object.extend(new Abstract.EventObserver(), {
     return Form.serialize(this.element);
   }
 });
-

@@ -82,7 +82,7 @@ Ajax.Request.prototype = Object.extend(new Ajax.Base(), {
   request: function(url) {
     this.url = url;
     this.method = this.options.method;
-    var params = this.options.parameters;
+    var params = Object.clone(this.options.parameters);
 
     if (!['get', 'post'].include(this.method)) {
       // simulate other verbs over post
@@ -90,14 +90,18 @@ Ajax.Request.prototype = Object.extend(new Ajax.Base(), {
       this.method = 'post';
     }
     
-    params = Hash.toQueryString(params);
-    if (params && /Konqueror|Safari|KHTML/.test(navigator.userAgent)) params += '&_='
-    
-    // when GET, append parameters to URL
-    if (this.method == 'get' && params)
-      this.url += (this.url.indexOf('?') > -1 ? '&' : '?') + params;
+    this.parameters = params;
+
+    if (params = Hash.toQueryString(params)) {
+      // when GET, append parameters to URL
+      if (this.method == 'get')
+        this.url += (this.url.include('?') ? '&' : '?') + params;
+      else if (/Konqueror|Safari|KHTML/.test(navigator.userAgent))
+        params += '&_=';
+    }
       
     try {
+      if (this.options.onCreate) this.options.onCreate(this.transport);
       Ajax.Responders.dispatch('onCreate', this, this.transport);
     
       this.transport.open(this.method.toUpperCase(), this.url, 
@@ -109,9 +113,8 @@ Ajax.Request.prototype = Object.extend(new Ajax.Base(), {
       this.transport.onreadystatechange = this.onStateChange.bind(this);
       this.setRequestHeaders();
 
-      var body = this.method == 'post' ? (this.options.postBody || params) : null;
-      
-      this.transport.send(body);
+      this.body = this.method == 'post' ? (this.options.postBody || params) : null;
+      this.transport.send(this.body);
 
       /* Force Firefox to handle ready state 4 for synchronous requests */
       if (!this.options.asynchronous && this.transport.overrideMimeType)
@@ -183,7 +186,8 @@ Ajax.Request.prototype = Object.extend(new Ajax.Base(), {
         this.dispatchException(e);
       }
       
-      if ((this.getHeader('Content-type') || 'text/javascript').strip().
+      var contentType = this.getHeader('Content-type');
+      if (contentType && contentType.strip().
         match(/^(text|application)\/(x-)?(java|ecma)script(;.*)?$/i))
           this.evalResponse();
     }
@@ -210,13 +214,13 @@ Ajax.Request.prototype = Object.extend(new Ajax.Base(), {
   evalJSON: function() {
     try {
       var json = this.getHeader('X-JSON');
-      return json ? eval('(' + json + ')') : null;
+      return json ? json.evalJSON() : null;
     } catch (e) { return null }
   },
   
   evalResponse: function() {
     try {
-      return eval(this.transport.responseText);
+      return eval((this.transport.responseText || '').unfilterJSON());
     } catch (e) {
       this.dispatchException(e);
     }

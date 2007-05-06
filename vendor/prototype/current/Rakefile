@@ -5,7 +5,7 @@ PROTOTYPE_ROOT     = File.expand_path(File.dirname(__FILE__))
 PROTOTYPE_SRC_DIR  = File.join(PROTOTYPE_ROOT, 'src')
 PROTOTYPE_DIST_DIR = File.join(PROTOTYPE_ROOT, 'dist')
 PROTOTYPE_PKG_DIR  = File.join(PROTOTYPE_ROOT, 'pkg')
-PROTOTYPE_VERSION  = '1.5.0'
+PROTOTYPE_VERSION  = '1.5.1'
 
 task :default => [:dist, :package, :clean_package_source]
 
@@ -43,7 +43,7 @@ JavaScriptTestTask.new(:test_units) do |t|
   t.mount("/dist")
   t.mount("/test")
   
-  Dir["test/unit/*.html"].each do |test_file|
+  Dir["test/unit/*.html"].sort.each do |test_file|
     test_file = "/#{test_file}"
     test_name = test_file[/.*\/(.+?)\.html/, 1]
     t.run(test_file) unless tests_to_run && !tests_to_run.include?(test_name)

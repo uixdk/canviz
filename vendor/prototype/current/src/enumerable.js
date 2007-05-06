@@ -1,16 +1,11 @@
-var $break    = new Object();
-var $continue = new Object();
+var $break = {}, $continue = new Error('"throw $continue" is deprecated, use "return" instead');
 
 var Enumerable = {
   each: function(iterator) {
     var index = 0;
     try {
       this._each(function(value) {
-        try {
-          iterator(value, index++);
-        } catch (e) {
-          if (e != $continue) throw e;
-        }
+        iterator(value, index++);
       });
     } catch (e) {
       if (e != $break) throw e;

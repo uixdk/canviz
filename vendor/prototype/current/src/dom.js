@@ -18,50 +18,52 @@ if (Prototype.BrowserFeatures.XPath) {
       results.push(query.snapshotItem(i));
     return results;
   };
-}
-
-document.getElementsByClassName = function(className, parentElement) {
-  if (Prototype.BrowserFeatures.XPath) {
+  
+  document.getElementsByClassName = function(className, parentElement) {
     var q = ".//*[contains(concat(' ', @class, ' '), ' " + className + " ')]";
     return document._getElementsByXPath(q, parentElement);
-  } else {
-    var children = ($(parentElement) || document.body).getElementsByTagName('*');
-    var elements = [], child;
-    for (var i = 0, length = children.length; i < length; i++) {
-      child = children[i];
-      if (Element.hasClassName(child, className))
-        elements.push(Element.extend(child));
-    }
-    return elements;
   }
+  
+} else document.getElementsByClassName = function(className, parentElement) {
+  var children = ($(parentElement) || document.body).getElementsByTagName('*');
+  var elements = [], child;
+  for (var i = 0, length = children.length; i < length; i++) {
+    child = children[i];
+    if (Element.hasClassName(child, className))
+      elements.push(Element.extend(child));
+  }
+  return elements;
 };
 
 /*--------------------------------------------------------------------------*/
 
-if (!window.Element)
-  var Element = new Object();
+if (!window.Element) var Element = {};
 
 Element.extend = function(element) {
-  if (!element || _nativeExtensions || element.nodeType == 3) return element;
-  
-  if (!element._extended && element.tagName && element != window) {
-    var methods = Object.clone(Element.Methods), cache = Element.extend.cache;
-    
-    if (element.tagName == 'FORM')
-      Object.extend(methods, Form.Methods);
-    if (['INPUT', 'TEXTAREA', 'SELECT'].include(element.tagName)) 
-      Object.extend(methods, Form.Element.Methods);
-    
-    Object.extend(methods, Element.Methods.Simulated);
-      
-    for (var property in methods) {
-      var value = methods[property];
-      if (typeof value == 'function' && !(property in element))
-        element[property] = cache.findOrStore(value);
-    }
+  var F = Prototype.BrowserFeatures;
+  if (!element || !element.tagName || element.nodeType == 3 || 
+   element._extended || F.SpecificElementExtensions || element == window) 
+    return element;
+
+  var methods = {}, tagName = element.tagName, cache = Element.extend.cache, 
+   T = Element.Methods.ByTag;
+
+  // extend methods for all tags (Safari doesn't need this)
+  if (!F.ElementExtensions) {
+    Object.extend(methods, Element.Methods), 
+    Object.extend(methods, Element.Methods.Simulated);      
   }
-  
-  element._extended = true;
+
+  // extend methods for specific tags
+  if (T[tagName]) Object.extend(methods, T[tagName]);
+
+  for (var property in methods) {
+    var value = methods[property];
+    if (typeof value == 'function' && !(property in element))
+      element[property] = cache.findOrStore(value);
+  }
+
+  element._extended = Prototype.emptyFunction;
   return element;
 };
 
@@ -147,7 +149,13 @@ Element.Methods = {
   },
   
   descendants: function(element) {
-    return $A($(element).getElementsByTagName('*'));
+    return $A($(element).getElementsByTagName('*')).each(Element.extend);
+  },
+  
+  firstDescendant: function(element) {
+    element = $(element).firstChild;
+    while (element && element.nodeType != 1) element = element.nextSibling;
+    return $(element);
   },
   
   immediateDescendants: function(element) {
@@ -177,19 +185,35 @@ Element.Methods = {
   },
   
   up: function(element, expression, index) {
-    return Selector.findElement($(element).ancestors(), expression, index);
+    element = $(element);
+    if (arguments.length == 1) return $(element.parentNode);
+    var ancestors = element.ancestors();
+    return expression ? Selector.findElement(ancestors, expression, index) :
+      ancestors[index || 0];
   },
   
   down: function(element, expression, index) {
-    return Selector.findElement($(element).descendants(), expression, index);
+    element = $(element);
+    if (arguments.length == 1) return element.firstDescendant();
+    var descendants = element.descendants();
+    return expression ? Selector.findElement(descendants, expression, index) :
+      descendants[index || 0];
   },
 
   previous: function(element, expression, index) {
-    return Selector.findElement($(element).previousSiblings(), expression, index);
+    element = $(element);
+    if (arguments.length == 1) return $(Selector.handlers.previousElementSibling(element));
+    var previousSiblings = element.previousSiblings();
+    return expression ? Selector.findElement(previousSiblings, expression, index) :
+      previousSiblings[index || 0];
   },
   
   next: function(element, expression, index) {
-    return Selector.findElement($(element).nextSiblings(), expression, index);
+    element = $(element);
+    if (arguments.length == 1) return $(Selector.handlers.nextElementSibling(element));
+    var nextSiblings = element.nextSiblings();
+    return expression ? Selector.findElement(nextSiblings, expression, index) :
+      nextSiblings[index || 0];
   },
   
   getElementsBySelector: function() {
@@ -203,12 +227,13 @@ Element.Methods = {
   
   readAttribute: function(element, name) {
     element = $(element);
-    if (document.all && !window.opera) {
+    if (Prototype.Browser.IE) {
+      if (!element.attributes) return null;
       var t = Element._attributeTranslations;
       if (t.values[name]) return t.values[name](element, name);
       if (t.names[name])  name = t.names[name];
       var attribute = element.attributes[name];
-      if(attribute) return attribute.nodeValue;
+      return attribute ? attribute.nodeValue : null;
     }    
     return element.getAttribute(name);
   },
@@ -277,7 +302,7 @@ Element.Methods = {
   },
   
   empty: function(element) {
-    return $(element).innerHTML.match(/^\s*$/);
+    return $(element).innerHTML.blank();
   },
   
   descendantOf: function(element, ancestor) {
@@ -296,55 +321,38 @@ Element.Methods = {
   
   getStyle: function(element, style) {
     element = $(element);
-    if (['float','cssFloat'].include(style))
-      style = (typeof element.style.styleFloat != 'undefined' ? 'styleFloat' : 'cssFloat');
-    style = style.camelize();
+    style = style == 'float' ? 'cssFloat' : style.camelize();
     var value = element.style[style];
     if (!value) {
-      if (document.defaultView && document.defaultView.getComputedStyle) {
-        var css = document.defaultView.getComputedStyle(element, null);
-        value = css ? css[style] : null;
-      } else if (element.currentStyle) {
-        value = element.currentStyle[style];
-      }
+      var css = document.defaultView.getComputedStyle(element, null);
+      value = css ? css[style] : null;
     }
-    
-    if((value == 'auto') && ['width','height'].include(style) && (element.getStyle('display') != 'none'))
-      value = element['offset'+style.capitalize()] + 'px';
-    
-    if (window.opera && ['left', 'top', 'right', 'bottom'].include(style))
-      if (Element.getStyle(element, 'position') == 'static') value = 'auto';
-    if(style == 'opacity') {
-      if(value) return parseFloat(value);
-      if(value = (element.getStyle('filter') || '').match(/alpha\(opacity=(.*)\)/))  
-        if(value[1]) return parseFloat(value[1]) / 100;  
-      return 1.0; 
-    }
+    if (style == 'opacity') return value ? parseFloat(value) : 1.0;
     return value == 'auto' ? null : value;
   },
   
-  setStyle: function(element, style) {
+  getOpacity: function(element) {
+    return $(element).getStyle('opacity');
+  },
+  
+  setStyle: function(element, styles, camelized) {
     element = $(element);
-    for (var name in style) {
-      var value = style[name];
-      if(name == 'opacity') {
-        if (value == 1) {
-          value = (/Gecko/.test(navigator.userAgent) &&
-            !/Konqueror|Safari|KHTML/.test(navigator.userAgent)) ? 0.999999 : 1.0;
-          if(/MSIE/.test(navigator.userAgent) && !window.opera)
-            element.style.filter = element.getStyle('filter').replace(/alpha\([^\)]*\)/gi,'');
-        } else if(value == '') {
-          if(/MSIE/.test(navigator.userAgent) && !window.opera)
-            element.style.filter = element.getStyle('filter').replace(/alpha\([^\)]*\)/gi,'');
-        } else {
-          if(value < 0.00001) value = 0;  
-          if(/MSIE/.test(navigator.userAgent) && !window.opera)
-            element.style.filter = element.getStyle('filter').replace(/alpha\([^\)]*\)/gi,'') +
-              'alpha(opacity='+value*100+')';
-        }
-      } else if(['float','cssFloat'].include(name)) name = (typeof element.style.styleFloat != 'undefined') ? 'styleFloat' : 'cssFloat';
-      element.style[name.camelize()] = value;
-    }
+    var elementStyle = element.style;
+
+    for (var property in styles)
+      if (property == 'opacity') element.setOpacity(styles[property])
+      else 
+        elementStyle[(property == 'float' || property == 'cssFloat') ?
+          (elementStyle.styleFloat === undefined ? 'cssFloat' : 'styleFloat') : 
+          (camelized ? property : property.camelize())] = styles[property];
+
+    return element;
+  },
+  
+  setOpacity: function(element, value) {
+    element = $(element);
+    element.style.opacity = (value == 1 || value === '') ? '' : 
+      (value < 0.00001) ? 0 : value;
     return element;
   },
   
@@ -415,64 +423,61 @@ Element.Methods = {
     element.style.overflow = element._overflow == 'auto' ? '' : element._overflow;
     element._overflow = null;
     return element;
-  }
+  }  
 };
 
-Object.extend(Element.Methods, {childOf: Element.Methods.descendantOf});
-
-Element._attributeTranslations = {};
-
-Element._attributeTranslations.names = {
-  colspan:   "colSpan",
-  rowspan:   "rowSpan",
-  valign:    "vAlign",
-  datetime:  "dateTime",
-  accesskey: "accessKey",
-  tabindex:  "tabIndex",
-  enctype:   "encType",
-  maxlength: "maxLength",
-  readonly:  "readOnly",
-  longdesc:  "longDesc"
-};
-
-Element._attributeTranslations.values = {
-  _getAttr: function(element, attribute) {
-    return element.getAttribute(attribute, 2);
-  },
-  
-  _flag: function(element, attribute) {
-    return $(element).hasAttribute(attribute) ? attribute : null;
-  },
-  
-  style: function(element) {
-    return element.style.cssText.toLowerCase();
-  },
-  
-  title: function(element) {
-    var node = element.getAttributeNode('title');
-    return node.specified ? node.nodeValue : null;
-  }
-};
-
-Object.extend(Element._attributeTranslations.values, {
-  href: Element._attributeTranslations.values._getAttr,
-  src:  Element._attributeTranslations.values._getAttr,
-  disabled: Element._attributeTranslations.values._flag,
-  checked:  Element._attributeTranslations.values._flag,
-  readonly: Element._attributeTranslations.values._flag,
-  multiple: Element._attributeTranslations.values._flag
+Object.extend(Element.Methods, {
+  childOf: Element.Methods.descendantOf,
+  childElements: Element.Methods.immediateDescendants
 });
 
-Element.Methods.Simulated = {
-  hasAttribute: function(element, attribute) {
-    var t = Element._attributeTranslations;
-    attribute = t.names[attribute] || attribute;
-    return $(element).getAttributeNode(attribute).specified;
-  }
-};
+if (Prototype.Browser.Opera) { 
+  Element.Methods._getStyle = Element.Methods.getStyle; 
+  Element.Methods.getStyle = function(element, style) { 
+    switch(style) { 
+      case 'left': 
+      case 'top': 
+      case 'right': 
+      case 'bottom': 
+        if (Element._getStyle(element, 'position') == 'static') return null; 
+      default: return Element._getStyle(element, style); 
+    }
+  }; 
+}
+else if (Prototype.Browser.IE) {
+  Element.Methods.getStyle = function(element, style) {
+    element = $(element);
+    style = (style == 'float' || style == 'cssFloat') ? 'styleFloat' : style.camelize();
+    var value = element.style[style];
+    if (!value && element.currentStyle) value = element.currentStyle[style];
 
-// IE is missing .innerHTML support for TABLE-related elements
-if (document.all && !window.opera){
+    if (style == 'opacity') {
+      if (value = (element.getStyle('filter') || '').match(/alpha\(opacity=(.*)\)/))
+        if (value[1]) return parseFloat(value[1]) / 100;
+      return 1.0;
+    }
+
+    if (value == 'auto') {
+      if ((style == 'width' || style == 'height') && (element.getStyle('display') != 'none'))
+        return element['offset'+style.capitalize()] + 'px';
+      return null;
+    }
+    return value;
+  };
+  
+  Element.Methods.setOpacity = function(element, value) {
+    element = $(element);
+    var filter = element.getStyle('filter'), style = element.style;
+    if (value == 1 || value === '') {
+      style.filter = filter.replace(/alpha\([^\)]*\)/gi,'');
+      return element;
+    } else if (value < 0.00001) value = 0;
+    style.filter = filter.replace(/alpha\([^\)]*\)/gi, '') +
+      'alpha(opacity=' + (value * 100) + ')';
+    return element;   
+  };
+
+  // IE is missing .innerHTML support for TABLE-related elements
   Element.Methods.update = function(element, html) {
     element = $(element);
     html = typeof html == 'undefined' ? '' : html.toString();
@@ -493,36 +498,124 @@ if (document.all && !window.opera){
           div.innerHTML = '<table><tbody><tr><td>' +  html.stripScripts() + '</td></tr></tbody></table>';
           depth = 4;
       }
-      $A(element.childNodes).each(function(node){
-        element.removeChild(node)
-      });
-      depth.times(function(){ div = div.firstChild });
-  
-      $A(div.childNodes).each(
-        function(node){ element.appendChild(node) });
+      $A(element.childNodes).each(function(node) { element.removeChild(node) });
+      depth.times(function() { div = div.firstChild });
+      $A(div.childNodes).each(function(node) { element.appendChild(node) });
     } else {
       element.innerHTML = html.stripScripts();
     }
-    setTimeout(function() {html.evalScripts()}, 10);
+    setTimeout(function() { html.evalScripts() }, 10);
     return element;
+  }
+}
+else if (Prototype.Browser.Gecko) {
+  Element.Methods.setOpacity = function(element, value) {
+    element = $(element);
+    element.style.opacity = (value == 1) ? 0.999999 : 
+      (value === '') ? '' : (value < 0.00001) ? 0 : value;
+    return element;
+  };
+}
+
+Element._attributeTranslations = {
+  names: {
+    colspan:   "colSpan",
+    rowspan:   "rowSpan",
+    valign:    "vAlign",
+    datetime:  "dateTime",
+    accesskey: "accessKey",
+    tabindex:  "tabIndex",
+    enctype:   "encType",
+    maxlength: "maxLength",
+    readonly:  "readOnly",
+    longdesc:  "longDesc"
+  },
+  values: {
+    _getAttr: function(element, attribute) {
+      return element.getAttribute(attribute, 2);
+    },
+    _flag: function(element, attribute) {
+      return $(element).hasAttribute(attribute) ? attribute : null;
+    },
+    style: function(element) {
+      return element.style.cssText.toLowerCase();
+    },
+    title: function(element) {
+      var node = element.getAttributeNode('title');
+      return node.specified ? node.nodeValue : null;
+    }
   }
 };
 
+(function() {
+  Object.extend(this, {
+    href: this._getAttr,
+    src:  this._getAttr,
+    type: this._getAttr,
+    disabled: this._flag,
+    checked:  this._flag,
+    readonly: this._flag,
+    multiple: this._flag
+  });
+}).call(Element._attributeTranslations.values);
+
+Element.Methods.Simulated = {
+  hasAttribute: function(element, attribute) {
+    var t = Element._attributeTranslations, node;
+    attribute = t.names[attribute] || attribute;
+    node = $(element).getAttributeNode(attribute);
+    return node && node.specified;
+  }
+};
+
+Element.Methods.ByTag = {};
+
 Object.extend(Element, Element.Methods);
 
-var _nativeExtensions = false;
+if (!Prototype.BrowserFeatures.ElementExtensions && 
+ document.createElement('div').__proto__) {
+  window.HTMLElement = {};
+  window.HTMLElement.prototype = document.createElement('div').__proto__;
+  Prototype.BrowserFeatures.ElementExtensions = true;
+}
 
-if(/Konqueror|Safari|KHTML/.test(navigator.userAgent))
-  ['', 'Form', 'Input', 'TextArea', 'Select'].each(function(tag) {
-    var className = 'HTML' + tag + 'Element';
-    if(window[className]) return;
-    var klass = window[className] = {};
-    klass.prototype = document.createElement(tag ? tag.toLowerCase() : 'div').__proto__;
-  });
+Element.hasAttribute = function(element, attribute) {
+  if (element.hasAttribute) return element.hasAttribute(attribute);
+  return Element.Methods.Simulated.hasAttribute(element, attribute);
+};
 
 Element.addMethods = function(methods) {
-  Object.extend(Element.Methods, methods || {});
+  var F = Prototype.BrowserFeatures, T = Element.Methods.ByTag;
   
+  if (!methods) {
+    Object.extend(Form, Form.Methods);
+    Object.extend(Form.Element, Form.Element.Methods);
+    Object.extend(Element.Methods.ByTag, {
+      "FORM":     Object.clone(Form.Methods),
+      "INPUT":    Object.clone(Form.Element.Methods),
+      "SELECT":   Object.clone(Form.Element.Methods),
+      "TEXTAREA": Object.clone(Form.Element.Methods)
+    });
+  }
+  
+  if (arguments.length == 2) {
+    var tagName = methods;
+    methods = arguments[1];
+  }
+  
+  if (!tagName) Object.extend(Element.Methods, methods || {});  
+  else {
+    if (tagName.constructor == Array) tagName.each(extend);
+    else extend(tagName);
+  }
+  
+  function extend(tagName) {
+    tagName = tagName.toUpperCase();
+    if (!Element.Methods.ByTag[tagName])
+      Element.Methods.ByTag[tagName] = {};
+    Object.extend(Element.Methods.ByTag[tagName], methods);
+  }
+
   function copy(methods, destination, onlyIfAbsent) {
     onlyIfAbsent = onlyIfAbsent || false;
     var cache = Element.extend.cache;
@@ -533,19 +626,49 @@ Element.addMethods = function(methods) {
     }
   }
   
-  if (typeof HTMLElement != 'undefined') {
+  function findDOMClass(tagName) {
+    var klass;
+    var trans = {       
+      "OPTGROUP": "OptGroup", "TEXTAREA": "TextArea", "P": "Paragraph", 
+      "FIELDSET": "FieldSet", "UL": "UList", "OL": "OList", "DL": "DList",
+      "DIR": "Directory", "H1": "Heading", "H2": "Heading", "H3": "Heading",
+      "H4": "Heading", "H5": "Heading", "H6": "Heading", "Q": "Quote", 
+      "INS": "Mod", "DEL": "Mod", "A": "Anchor", "IMG": "Image", "CAPTION": 
+      "TableCaption", "COL": "TableCol", "COLGROUP": "TableCol", "THEAD": 
+      "TableSection", "TFOOT": "TableSection", "TBODY": "TableSection", "TR":
+      "TableRow", "TH": "TableCell", "TD": "TableCell", "FRAMESET": 
+      "FrameSet", "IFRAME": "IFrame"
+    };
+    if (trans[tagName]) klass = 'HTML' + trans[tagName] + 'Element';
+    if (window[klass]) return window[klass];
+    klass = 'HTML' + tagName + 'Element';
+    if (window[klass]) return window[klass];
+    klass = 'HTML' + tagName.capitalize() + 'Element';
+    if (window[klass]) return window[klass];
+    
+    window[klass] = {};
+    window[klass].prototype = document.createElement(tagName).__proto__;
+    return window[klass];
+  }
+  
+  if (F.ElementExtensions) {
     copy(Element.Methods, HTMLElement.prototype);
     copy(Element.Methods.Simulated, HTMLElement.prototype, true);
-    copy(Form.Methods, HTMLFormElement.prototype);
-    [HTMLInputElement, HTMLTextAreaElement, HTMLSelectElement].each(function(klass) {
-      copy(Form.Element.Methods, klass.prototype);
-    });
-    _nativeExtensions = true;
   }
-}
+  
+  if (F.SpecificElementExtensions) {
+    for (var tag in Element.Methods.ByTag) {
+      var klass = findDOMClass(tag);
+      if (typeof klass == "undefined") continue;
+      copy(T[tag], klass.prototype);
+    }
+  }  
 
-var Toggle = new Object();
-Toggle.display = Element.toggle;
+  Object.extend(Element, Element.Methods);
+  delete Element.ByTag;
+};
+
+var Toggle = { display: Element.toggle };
 
 /*--------------------------------------------------------------------------*/
 

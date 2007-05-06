@@ -23,14 +23,15 @@
 <!-- Log output -->
 <div id="testlog"> </div>
 
-<form id="form">
+<form id="form" method="get" action="fixtures/empty.js">
   <input type="text" name="val1" id="input_enabled" value="4" />
   <div>This is not a form element</div>
   <input type="text" name="val2" id="input_disabled" disabled="disabled" value="5" />
   <input type="submit" />
+  <input type="text" name="action" value="blah" />
 </form>
 <div id="form_wrapper">
-  <form id="form_selects">
+  <form id="form_selects" action="fixtures/empty.js">
     <select name="vu">
        <option value="1" selected="selected">One</option>
        <option value="2">Two</option>
@@ -66,6 +67,14 @@
   </form>
 </div>
 
+<form id="form_array"> 
+  <input type="text" name="twin" value="" /> 
+  <input type="text" name="twin" value="siamese" />
+  <!-- Rails checkbox hack with hidden input: -->
+  <input type="checkbox" id="checkbox_hack" name="checky" value="1" /> 
+  <input name="checky" type="hidden" value="0" />
+</form>
+
 <form id="form_getelements">
   <select id="tf_selectOne" name="tf_selectOne"><option></option><option>1</option></select>
   <textarea id="tf_textarea" name="tf_textarea"></textarea>
@@ -84,6 +93,10 @@
   <input type="button" name="focus_button" id="focus_button" value="button" />
   <input type="reset" name="focus_reset" id="focus_reset" />
   <input type="text" name="focus_text" id="focus_text" value="Hello" />
+</form>
+
+<form id="form_focus_hidden" style="display: none">
+  <input type="text" />
 </form>
 
 <!-- Tests follow -->
@@ -107,6 +120,10 @@
       $('tf_password').value = '';
       $('tf_checkbox').checked = false;
       $('tf_radio').checked = false;
+    }},
+    
+    testDollarF: function(){ with(this) {
+      assertEqual("4", $F("input_enabled"));
     }},
     
     testFormElementEventObserver: function(){ with(this) {
@@ -172,6 +189,37 @@
       });
     }},
     
+    testFormEnabling: function(){ with(this) {
+      var form = $('form_focus')
+      var input1 = form.focus_disabled
+      var input2 = form.focus_text
+      
+      assert(input1.disabled)
+      assert(!input2.disabled)
+      
+      form.disable()
+      assert(input1.disabled)
+      assert(input2.disabled)
+      
+      form.enable()
+      assert(!input1.disabled)
+      assert(!input2.disabled)
+      
+      input1.disable()
+      assert(input1.disabled)
+      
+      // non-form elements:
+      var fieldset = $('form_fieldset')
+      var fields = fieldset.immediateDescendants()
+      assert(fields.all(function(select){ return !select.disabled }))
+      
+      Form.disable(fieldset)
+      assert(fields.all(function(select){ return select.disabled }))
+      
+      Form.enable(fieldset)
+      assert(fields.all(function(select){ return !select.disabled }))
+    }},
+    
     testFormElementEnabling: function(){ with(this) {
       assert($('input_disabled').disabled);
       $('input_disabled').enable();
@@ -209,13 +257,18 @@
       Form.focusFirstElement('form_focus');
       if(document.selection) assertEqual('', getSelection(element));
       
-      // Form.Field.activate shouldn't select text on buttons
+      // Form.Element.activate shouldn't select text on buttons
       element = $('focus_text');
       assertEqual('', getSelection(element));
         
-      // Form.Field.activate should select text on text input elements
+      // Form.Element.activate should select text on text input elements
       element.activate();
       assertEqual('Hello', getSelection(element));
+
+      // Form.Element.activate shouldn't raise an exception when the form or field is hidden
+      assertNothingRaised(function() {
+        $('form_focus_hidden').focusFirstElement();
+      });
     }},
     
     testFormGetElements: function() {with(this) {
@@ -262,16 +315,81 @@
 
       // Checks that disabled element is not included in serialized form.
       $('input_enabled').enable();
-      assertEqual('val1=4', Form.serialize('form'));
+      assertEqual('val1=4&action=blah', Form.serialize('form'));
 
-       // Checks that select-related serializations work just fine
-       assertEqual('vu=1&vm%5B%5D=1&vm%5B%5D=3&nvu=One&nvm%5B%5D=One&nvm%5B%5D=Three&evu=&evm%5B%5D=&evm%5B%5D=Three', Form.serialize('form_selects'));
+      // Checks that select-related serializations work just fine
+      assertEqual('vu=1&vm%5B%5D=1&vm%5B%5D=3&nvu=One&nvm%5B%5D=One'+
+        '&nvm%5B%5D=Three&evu=&evm%5B%5D=&evm%5B%5D=Three', 
+        Form.serialize('form_selects'));
+      
+      // should not eat empty values for duplicate names 
+      $('checkbox_hack').checked = false;
+      var data = Form.serialize('form_array', true); 
+      assertEnumEqual(['', 'siamese'], data['twin']); 
+      assertEqual('0', data['checky']);
+      
+      $('checkbox_hack').checked = true; 
+      assertEnumEqual($w('1 0'), Form.serialize('form_array', true)['checky']);
     }},
     
     testFormSerializeWorksWithNonFormElements: function() {with(this) {
       assertEqual('nvm%5B%5D=One&nvm%5B%5D=Three&evu=&evm%5B%5D=&evm%5B%5D=Three', Form.serialize('form_fieldset'));
       assertEqual('vu=1&vm%5B%5D=1&vm%5B%5D=3&nvu=One&nvm%5B%5D=One&nvm%5B%5D=Three&evu=&evm%5B%5D=&evm%5B%5D=Three', Form.serialize('form_wrapper'));
-    }} 
+    }},
+    
+    testFormMethodsOnExtendedElements: function() {with(this) {
+      assertEqual(Form.serialize('form'), $('form').serialize());
+      assertEqual(Form.Element.serialize('input_enabled'), $('input_enabled').serialize());
+      assertNotEqual($('form').serialize, $('input_enabled').serialize);
+      
+      Element.addMethods('INPUT',  { anInputMethod: function(input)  { return 'input'  } });
+      Element.addMethods('SELECT', { aSelectMethod: function(select) { return 'select' } });
+
+      document.getElementById('tf_text')._extended = false;
+      document.getElementById('tf_selectOne')._extended = false;
+
+      assert($('tf_text').anInputMethod);
+      assert(!$('tf_text').aSelectMethod);
+      assertEqual('input', $('tf_text').anInputMethod());
+
+      assert($('tf_selectOne').aSelectMethod);
+      assert(!$('tf_selectOne').anInputMethod);      
+      assertEqual('select', $('tf_selectOne').aSelectMethod());
+    }},
+    
+    testFormRequest: function() {with(this) {
+      var request = $("form_selects").request();
+      assert(!$("form_selects").hasAttribute("method"));
+      assert(request.url.endsWith("fixtures/empty.js"));
+      assertEqual("post", request.method);
+      assertEqual("vu=1&vm%5B%5D=1&vm%5B%5D=3&nvu=One&nvm%5B%5D=One&nvm%5B%5D=Three&evu=&evm%5B%5D=&evm%5B%5D=Three", Hash.toQueryString(request.options.parameters));
+
+      request = $("form_selects").request({method: "put", parameters: {val2: "hello", val3: "world"}});
+      assertEqual("post", request.method);
+      assertEqual("put", request.parameters['_method']);
+      assertEqual("vu=1&vm%5B%5D=1&vm%5B%5D=3&nvu=One&nvm%5B%5D=One&nvm%5B%5D=Three&evu=&evm%5B%5D=&evm%5B%5D=Three&val2=hello&val3=world", Hash.toQueryString(request.options.parameters));
+      
+      request = $("form").request();
+      assert($("form").hasAttribute("method"));
+      assert(request.url.endsWith("fixtures/empty.js?val1=4&action=blah"));
+      assertEqual("get", request.method);
+      
+      request = $("form").request({method: "post"});
+      assert(request.url.endsWith("fixtures/empty.js"));
+      assertEqual("val1=4&action=blah", Hash.toQueryString(request.options.parameters));
+      assertEqual("post", request.method);
+    }},
+    
+    testFormElementMethodsChaining: function(){ with(this) {
+      var methods = $w('clear activate disable enable'),
+        formElements = $('form_getelements').getElements();
+      methods.each(function(method){
+        formElements.each(function(element){
+          var returned = element[method]();
+          assertIdentical(element, returned);
+        });
+      });
+    }}
     
   }, 'testlog');
 // ]]>

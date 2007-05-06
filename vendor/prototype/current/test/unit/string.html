@@ -26,6 +26,7 @@
 <!-- Tests follow -->
 <script type="text/javascript" language="javascript" charset="utf-8">
 // <![CDATA[
+  var attackTarget;
   var evalScriptsCounter = 0,
       largeTextEscaped = '&lt;span&gt;test&lt;/span&gt;', 
       largeTextUnescaped = '<span>test</span>';
@@ -75,6 +76,11 @@
         source.gsub(/\s+/, ''));
       assertEqual('  z', 
         source.gsub(/(.)(o+)/, ''));
+        
+      assertEqual('ウィメンズ2007<br/>クルーズコレクション', 
+        'ウィメンズ2007\nクルーズコレクション'.gsub(/\n/,'<br/>'));
+      assertEqual('ウィメンズ2007<br/>クルーズコレクション', 
+        'ウィメンズ2007\nクルーズコレクション'.gsub('\n','<br/>'));
     }},
     
     testGsubWithReplacementTemplateString: function() {with(this) {
@@ -216,6 +222,7 @@
       assertEqual('hello world', 'hello <span>world</span>'.stripTags());
       assertEqual('hello world', '<a href="#" onclick="moo!">hello</a> world'.stripTags());
       assertEqual('hello world', 'h<b><em>e</em></b>l<i>l</i>o w<span class="moo" id="x"><b>o</b></span>rld'.stripTags());
+      assertEqual('1\n2', '1\n2'.stripTags());
     }},
     
     testStripScripts: function() {with(this) {
@@ -250,10 +257,19 @@
       assertEqual('foo &lt;span&gt;bar&lt;/span&gt;', 'foo <span>bar</span>'.escapeHTML());
       assertEqual('foo ß bar', 'foo ß bar'.escapeHTML());
       
+      assertEqual('ウィメンズ2007\nクルーズコレクション', 
+        'ウィメンズ2007\nクルーズコレクション'.escapeHTML());
+        
       assertEqual('a&lt;a href="blah"&gt;blub&lt;/a&gt;b&lt;span&gt;&lt;div&gt;&lt;/div&gt;&lt;/span&gt;cdef&lt;strong&gt;!!!!&lt;/strong&gt;g',
-                  'a<a href="blah">blub</a>b<span><div></div></span>cdef<strong>!!!!</strong>g'.escapeHTML());
+        'a<a href="blah">blub</a>b<span><div></div></span>cdef<strong>!!!!</strong>g'.escapeHTML());
       
       assertEqual(largeTextEscaped, largeTextUnescaped.escapeHTML());
+      
+      assertEqual('1\n2', '1\n2'.escapeHTML());
+      
+      benchmark(function(){
+        largeTextUnescaped.escapeHTML();
+      },1000);
     }},
     
     testUnescapeHTML: function() {with(this) {
@@ -265,6 +281,13 @@
         'a&lt;a href="blah"&gt;blub&lt;/a&gt;b&lt;span&gt;&lt;div&gt;&lt;/div&gt;&lt;/span&gt;cdef&lt;strong&gt;!!!!&lt;/strong&gt;g'.unescapeHTML());
       
       assertEqual(largeTextUnescaped, largeTextEscaped.unescapeHTML());
+      
+      assertEqual('1\n2', '1\n2'.unescapeHTML());
+      
+      benchmark(function(){
+        largeTextEscaped.unescapeHTML();
+      },1000);
+      
     }},
     
     testTemplateEvaluation: function() {with(this) {
@@ -288,38 +311,82 @@
     }},
     
     testToQueryParams: function() {with(this) {
-      assertEnumEqual([], Object.keys(''.toQueryParams()));
-      assertEnumEqual([], Object.keys('foo?'.toQueryParams()));
+      // only the query part
+      var result = {a:undefined, b:'c'};
+      assertHashEqual({}, ''.toQueryParams(), 'empty query');
+      assertHashEqual({}, 'foo?'.toQueryParams(), 'empty query with URL');
+      assertHashEqual(result, 'foo?a&b=c'.toQueryParams(), 'query with URL');
+      assertHashEqual(result, 'foo?a&b=c#fragment'.toQueryParams(), 'query with URL and fragment');
+      assertHashEqual(result, 'a;b=c'.toQueryParams(';'), 'custom delimiter');
+    
+      assertHashEqual({a:undefined}, 'a'.toQueryParams(), 'key without value');
+      assertHashEqual({a:'b'},  'a=b&=c'.toQueryParams(), 'empty key');
+      assertHashEqual({a:'b', c:''}, 'a=b&c='.toQueryParams(), 'empty value');
       
-      assertEnumEqual(['a', 'b'], Object.keys('foo?a&b'.toQueryParams()));
-      assertEnumEqual(['a', 'b'], Object.keys('foo?a&b#fragment'.toQueryParams()));
-      assertEnumEqual(['a', 'b'], Object.keys('a;b'.toQueryParams(';')));
+      assertHashEqual({'a b':'c', d:'e f', g:'h'},
+        'a%20b=c&d=e%20f&g=h'.toQueryParams(), 'proper decoding');
+      assertHashEqual({a:'b=c=d'}, 'a=b=c=d'.toQueryParams(), 'multiple equal signs');
+      assertHashEqual({a:'b', c:'d'}, '&a=b&&&c=d'.toQueryParams(), 'proper splitting');
       
-      var result = 'a'.toQueryParams();
-      assertEqual(undefined, result['a']);
-      assert(result.hasOwnProperty('a'));
-      
-      result = 'a&b=c'.toQueryParams();
-      assertEqual(undefined, result['a']);
-      assert(result.hasOwnProperty('a'));
-      assertEqual('c', result['b']);
-      
-      result = 'a%20b=c&d=e%20f&g=h'.toQueryParams();
-      assertEqual('c', result['a b']);
-      assertEqual('e f', result['d']);
-      assertEqual('h', result['g']);
-      
-      result = 'color=r&color=g&color=b'.toQueryParams();
-      assertEnumEqual(['r', 'g', 'b'], result['color']);
-      assertEnumEqual(['r', 'b'], 'c=r&c=&c=b'.toQueryParams()['c']);
-      assertEqual('blue', 'c=&c=blue'.toQueryParams()['c']);
-      assertEqual('blue', 'c=blue&c='.toQueryParams()['c']);
+      assertEnumEqual($w('r g b'), 'col=r&col=g&col=b'.toQueryParams()['col'],
+        'collection without square brackets');
+      var msg = 'empty values inside collection';
+      assertEnumEqual(['r', '', 'b'], 'c=r&c=&c=b'.toQueryParams()['c'], msg);
+      assertEnumEqual(['', 'blue'],   'c=&c=blue'.toQueryParams()['c'], msg);
+      assertEnumEqual(['blue', ''],   'c=blue&c='.toQueryParams()['c'], msg);
     }},
     
     testInspect: function() {with(this) {
       assertEqual('\'\'', ''.inspect());
       assertEqual('\'test\'', 'test'.inspect());
       assertEqual('\'test \\\'test\\\' "test"\'', 'test \'test\' "test"'.inspect());
+      assertEqual('\"test \'test\' \\"test\\"\"', 'test \'test\' "test"'.inspect(true));
+      assertEqual('\'\\b\\t\\n\\f\\r"\\\\\'', '\b\t\n\f\r"\\'.inspect());
+      assertEqual('\"\\b\\t\\n\\f\\r\\"\\\\\"', '\b\t\n\f\r"\\'.inspect(true));
+      assertEqual('\'\\b\\t\\n\\f\\r\'', '\x08\x09\x0a\x0c\x0d'.inspect());
+      assertEqual('\'\\u001a\'', '\x1a'.inspect());
+    }},
+    
+    testInclude: function() {with(this) {
+      assert('hello world'.include('h'));
+      assert('hello world'.include('hello'));
+      assert('hello world'.include('llo w'));
+      assert('hello world'.include('world'));      
+      assert(!'hello world'.include('bye'));
+      assert(!''.include('bye'));
+    }},
+    
+    testStartsWith: function() {with(this) {
+      assert('hello world'.startsWith('h'));
+      assert('hello world'.startsWith('hello'));
+      assert(!'hello world'.startsWith('bye'));
+      assert(!''.startsWith('bye'));
+      assert(!'hell'.startsWith('hello'));
+    }},
+    
+    testEndsWith: function() {with(this) {
+      assert('hello world'.endsWith('d'));
+      assert('hello world'.endsWith(' world'));
+      assert(!'hello world'.endsWith('planet'));
+      assert(!''.endsWith('planet'));
+      assert('hello world world'.endsWith(' world'));
+      assert(!'z'.endsWith('az'));
+    }},
+    
+    testBlank: function() { with(this) {
+      assert(''.blank());
+      assert(' '.blank());
+      assert('\t\r\n '.blank());
+      assert(!'a'.blank());
+      assert(!'\t y \n'.blank());
+    }},
+    
+    testEmpty: function() { with(this) {
+      assert(''.empty());
+      assert(!' '.empty());
+      assert(!'\t\r\n '.empty());
+      assert(!'a'.empty());
+      assert(!'\t y \n'.empty());
     }},
     
     testSucc: function() {with(this) {
@@ -329,6 +396,46 @@
       assertEqual('abce', 'abcd'.succ());
       assertEqual('{', 'z'.succ());
       assertEqual(':', '9'.succ());
+    }},
+
+    testTimes: function() {with(this) {
+      assertEqual('', ''.times(0));
+      assertEqual('', ''.times(5));
+      assertEqual('', 'a'.times(0));
+      assertEqual('a', 'a'.times(1));
+      assertEqual('aaaaa', 'a'.times(5));
+      assertEqual('foofoofoofoofoo', 'foo'.times(5));
+      assertEqual('', 'foo'.times(-5));
+    }},
+    
+    testToJSON: function() {with(this) {
+      assertEqual('\"\"', ''.toJSON());
+      assertEqual('\"test\"', 'test'.toJSON());
+    }},
+
+    testEvalJSON: function() {with(this) {
+      var valid = '{test: "hello world!"}';
+      var invalid = '{test: "hello world!"';
+      var dangerous = '{});attackTarget = "attack succeeded!";({}';
+      
+      assertEqual('hello world!', valid.evalJSON().test);
+      assertEqual('hello world!', valid.evalJSON(true).test);
+      assertRaise('SyntaxError', function(){invalid.evalJSON();});
+      assertRaise('SyntaxError', function(){invalid.evalJSON(true);});
+
+      attackTarget = "scared";      
+      dangerous.evalJSON();
+      assertEqual("attack succeeded!", attackTarget);
+      
+      attackTarget = "Not scared!";
+      assertRaise('SyntaxError', function(){dangerous.evalJSON(true)});
+      assertEqual("Not scared!", attackTarget);
+
+      assertEqual('hello world!', ('/*-secure-\n' + valid + '\n*/').evalJSON().test);
+      var temp = Prototype.JSONFilter;
+      Prototype.JSONFilter = /^\/\*(.*)\*\/$/; // test custom delimiters.
+      assertEqual('hello world!', ('/*' + valid + '*/').evalJSON().test);
+      Prototype.JSONFilter = temp;
     }}
   }, 'testlog');
 // ]]>

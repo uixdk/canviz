@@ -1,6 +1,8 @@
 require 'rake/tasklib'
 require 'thread'
 require 'webrick'
+require 'fileutils'
+include FileUtils
 
 class Browser
   def supported?; true; end
@@ -32,7 +34,7 @@ class Browser
 end
 
 class FirefoxBrowser < Browser
-  def initialize(path='c:\Program Files\Mozilla Firefox\firefox.exe')
+  def initialize(path=File.join(ENV['ProgramFiles'] || 'c:\Program Files', '\Mozilla Firefox\firefox.exe'))
     @path = path
   end
 
@@ -70,20 +72,8 @@ class SafariBrowser < Browser
 end
 
 class IEBrowser < Browser
-  def initialize(path='C:\Program Files\Internet Explorer\IEXPLORE.EXE')
-    @path = path
-  end
-  
   def setup
-    if windows?
-      puts %{
-        MAJOR ANNOYANCE on Windows.
-        You have to shut down the Internet Explorer manually after each test
-        for the script to proceed.
-        Any suggestions on fixing this is GREATLY appreaciated!
-        Thank you for your understanding.
-      }
-    end
+    require 'win32ole' if windows?
   end
 
   def supported?
@@ -91,7 +81,14 @@ class IEBrowser < Browser
   end
   
   def visit(url)
-    system("#{@path} #{url}") if windows? 
+    if windows?
+      ie = WIN32OLE.new('InternetExplorer.Application')
+      ie.visible = true
+      ie.Navigate(url)
+      while ie.ReadyState != 4 do
+        sleep(1)
+      end
+    end
   end
 
   def to_s
@@ -100,8 +97,32 @@ class IEBrowser < Browser
 end
 
 class KonquerorBrowser < Browser
+  @@configDir = File.join(ENV['HOME'], '.kde', 'share', 'config')
+  @@globalConfig = File.join(@@configDir, 'kdeglobals')
+  @@konquerorConfig = File.join(@@configDir, 'konquerorrc')
+
   def supported?
     linux?
+  end
+
+  # Forces KDE's default browser to be Konqueror during the tests, and forces
+  # Konqueror to open external URL requests in new tabs instead of a new
+  # window.
+  def setup
+    cd @@configDir, :verbose => false do
+      copy @@globalConfig, "#{@@globalConfig}.bak", :preserve => true, :verbose => false
+      copy @@konquerorConfig, "#{@@konquerorConfig}.bak", :preserve => true, :verbose => false
+      # Too lazy to write it in Ruby...  Is sed dependency so bad?
+      system "sed -ri /^BrowserApplication=/d  '#{@@globalConfig}'"
+      system "sed -ri /^KonquerorTabforExternalURL=/s:false:true: '#{@@konquerorConfig}'"
+    end
+  end
+
+  def teardown
+    cd @@configDir, :verbose => false do
+      copy "#{@@globalConfig}.bak", @@globalConfig, :preserve => true, :verbose => false
+      copy "#{@@konquerorConfig}.bak", @@konquerorConfig, :preserve => true, :verbose => false
+    end
   end
   
   def visit(url)

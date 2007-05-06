@@ -10,6 +10,21 @@ var $A = Array.from = function(iterable) {
   }
 }
 
+if (Prototype.Browser.WebKit) {
+  $A = Array.from = function(iterable) {
+    if (!iterable) return [];
+    if (!(typeof iterable == 'function' && iterable == '[object NodeList]') && 
+      iterable.toArray) {
+      return iterable.toArray();
+    } else {
+      var results = [];
+      for (var i = 0, length = iterable.length; i < length; i++)
+        results.push(iterable[i]);
+      return results;
+    }
+  }
+}
+
 Object.extend(Array.prototype, Enumerable);
 
 if (!Array.prototype._reverse)
@@ -68,9 +83,11 @@ Object.extend(Array.prototype, {
     return this.length > 1 ? this : this[0];
   },
   
-  uniq: function() {
-    return this.inject([], function(array, value) {
-      return array.include(value) ? array : array.concat([value]);
+  uniq: function(sorted) {
+    return this.inject([], function(array, value, index) {
+      if (0 == index || (sorted ? array.last() != value : !array.include(value)))
+        array.push(value);
+      return array;
     });
   },
   
@@ -84,23 +101,32 @@ Object.extend(Array.prototype, {
   
   inspect: function() {
     return '[' + this.map(Object.inspect).join(', ') + ']';
+  },
+  
+  toJSON: function() {
+    var results = [];
+    this.each(function(object) {
+      var value = Object.toJSON(object);
+      if (value !== undefined) results.push(value);
+    });
+    return '[' + results.join(', ') + ']';
   }
 });
 
 Array.prototype.toArray = Array.prototype.clone;
 
-function $w(string){
+function $w(string) {
   string = string.strip();
   return string ? string.split(/\s+/) : [];
 }
 
-if(window.opera){
-  Array.prototype.concat = function(){
+if (Prototype.Browser.Opera){
+  Array.prototype.concat = function() {
     var array = [];
-    for(var i = 0, length = this.length; i < length; i++) array.push(this[i]);
-    for(var i = 0, length = arguments.length; i < length; i++) {
-      if(arguments[i].constructor == Array) {
-        for(var j = 0, arrayLength = arguments[i].length; j < arrayLength; j++) 
+    for (var i = 0, length = this.length; i < length; i++) array.push(this[i]);
+    for (var i = 0, length = arguments.length; i < length; i++) {
+      if (arguments[i].constructor == Array) {
+        for (var j = 0, arrayLength = arguments[i].length; j < arrayLength; j++) 
           array.push(arguments[i][j]);
       } else { 
         array.push(arguments[i]);
