@@ -1,0 +1,26 @@
+#summary How to use Canviz
+#labels Featured
+
+
+= Introduction =
+
+Canviz began as a proof of concept—is it possible to draw Graphviz graphs to a browser canvas? I thought a good place to start would be to try to write an example that could render all the sample graphs included with Graphviz. As of October 2008, Canviz can do this. This page explains how to get this example working on your system.
+
+
+= Requirements =
+
+The example requires:
+
+ * a web server with PHP support (although Canviz is a !JavaScript library that runs entirely in the browser, the example needs PHP on the server side)
+ * a web browser that supports the canvas element
+ * Graphviz
+
+The example uses pre-rendered xdot files, so you don't need to install Graphviz on the server; you can install Graphviz on your computer and upload the resulting xdot files to the server.
+
+
+= Setup =
+
+ * [http://code.google.com/p/canviz/source/checkout Check out] the Canviz trunk.
+ * Run `./generate.sh` in the source directory to pre-render the xdot files (this requires the bash shell, so you need a UNIX-like operating system, or Cygwin on Windows).
+ * Upload everything to your server.
+ * Access index.php in a web browser.
