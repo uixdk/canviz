@@ -4,7 +4,7 @@
 
 = Introduction =
 
-Canviz began as a proof of concept—is it possible to draw Graphviz graphs to a browser canvas? I thought a good place to start would be to try to write an example that could render all the sample graphs included with Graphviz. As of October 2008, Canviz can do this. This page explains how to get this example working on your system.
+Canviz began as a proof of concept—is it possible to draw Graphviz graphs to a browser canvas? I thought a good place to start would be to try to write an example that could render all the sample graphs included with Graphviz. As of October 2008, Canviz can do this. You can see it in action on the [http://www.ryandesign.com/canviz/ demo page]. This wiki page explains how to get this example working on your system.
 
 
 = Requirements =
