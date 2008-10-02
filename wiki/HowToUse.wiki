@@ -12,7 +12,7 @@ Canviz began as a proof of concept—is it possible to draw Graphviz graphs to a
 The example requires:
 
  * a web server with PHP support (although Canviz is a !JavaScript library that runs entirely in the browser, the example needs PHP on the server side)
- * a web browser that supports the canvas element
+ * a [Browsers supported web browser]
  * Graphviz
 
 The example uses pre-rendered xdot files, so you don't need to install Graphviz on the server; you can install Graphviz on your computer and upload the resulting xdot files to the server.
