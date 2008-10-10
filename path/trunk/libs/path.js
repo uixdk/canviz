@@ -58,7 +58,7 @@ Bezier.prototype = {
 	// From Oliver Steele's bezier.js library.
 	triangle: function() {
 		var upper = this.points;
-		var m = [upper]
+		var m = [upper];
 		for (var i = 1; i < this.order; ++i) {
 			var lower = [];
 			for (var j = 0; j < this.order - i; ++j) {
@@ -75,7 +75,7 @@ Bezier.prototype = {
 	triangleAtT: function(t) {
 		var s = 1 - t;
 		var upper = this.points;
-		var m = [upper]
+		var m = [upper];
 		for (var i = 1; i < this.order; ++i) {
 			var lower = [];
 			for (var j = 0; j < this.order - i; ++j) {
