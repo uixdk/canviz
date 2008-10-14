@@ -21,6 +21,6 @@ The example uses pre-rendered xdot files, so you don't need to install Graphviz 
 = Setup =
 
  * [http://code.google.com/p/canviz/source/checkout Check out] the Canviz trunk.
- * Run `./generate.sh` in the source directory to pre-render the xdot files (this requires the bash shell, so you need a UNIX-like operating system, or Cygwin on Windows).
+ * Run `make examples` in the source directory to pre-render the xdot files (besides Graphviz, this requires standard UNIX utilities like make, bash, awk, dirname, find and which, so you need a UNIX-like operating system, or Cygwin on Windows).
  * Upload everything to your server.
- * Access index.php in a web browser.
+ * Access index.html in a web browser.
