@@ -1,11 +1,11 @@
-var $break = {}, $continue = new Error('"throw $continue" is deprecated, use "return" instead');
+var $break = { };
 
 var Enumerable = {
-  each: function(iterator) {
+  each: function(iterator, context) {
     var index = 0;
     try {
       this._each(function(value) {
-        iterator(value, index++);
+        iterator.call(context, value, index++);
       });
     } catch (e) {
       if (e != $break) throw e;
@@ -13,43 +13,47 @@ var Enumerable = {
     return this;
   },
   
-  eachSlice: function(number, iterator) {
+  eachSlice: function(number, iterator, context) {
     var index = -number, slices = [], array = this.toArray();
+    if (number < 1) return array;
     while ((index += number) < array.length)
       slices.push(array.slice(index, index+number));
-    return slices.map(iterator);
+    return slices.collect(iterator, context);
   },
-  
-  all: function(iterator) {
+
+  all: function(iterator, context) {
+    iterator = iterator || Prototype.K;
     var result = true;
     this.each(function(value, index) {
-      result = result && !!(iterator || Prototype.K)(value, index);
+      result = result && !!iterator.call(context, value, index);
       if (!result) throw $break;
     });
     return result;
   },
-  
-  any: function(iterator) {
+
+  any: function(iterator, context) {
+    iterator = iterator || Prototype.K;
     var result = false;
     this.each(function(value, index) {
-      if (result = !!(iterator || Prototype.K)(value, index)) 
+      if (result = !!iterator.call(context, value, index))
         throw $break;
     });
     return result;
   },
-  
-  collect: function(iterator) {
+
+  collect: function(iterator, context) {
+    iterator = iterator || Prototype.K;
     var results = [];
     this.each(function(value, index) {
-      results.push((iterator || Prototype.K)(value, index));
+      results.push(iterator.call(context, value, index));
     });
     return results;
   },
   
-  detect: function(iterator) {
+  detect: function(iterator, context) {
     var result;
     this.each(function(value, index) {
-      if (iterator(value, index)) {
+      if (iterator.call(context, value, index)) {
         result = value;
         throw $break;
       }
@@ -57,26 +61,33 @@ var Enumerable = {
     return result;
   },
   
-  findAll: function(iterator) {
+  findAll: function(iterator, context) {
     var results = [];
     this.each(function(value, index) {
-      if (iterator(value, index))
+      if (iterator.call(context, value, index))
         results.push(value);
     });
     return results;
   },
   
-  grep: function(pattern, iterator) {
+  grep: function(filter, iterator, context) {
+    iterator = iterator || Prototype.K;
     var results = [];
+
+    if (Object.isString(filter))
+      filter = new RegExp(filter);
+      
     this.each(function(value, index) {
-      var stringValue = value.toString();
-      if (stringValue.match(pattern))
-        results.push((iterator || Prototype.K)(value, index));
-    })
+      if (filter.match(value))
+        results.push(iterator.call(context, value, index));
+    });
     return results;
   },
   
   include: function(object) {
+    if (Object.isFunction(this.indexOf))
+      if (this.indexOf(object) != -1) return true;
+
     var found = false;
     this.each(function(value) {
       if (value == object) {
@@ -88,16 +99,16 @@ var Enumerable = {
   },
   
   inGroupsOf: function(number, fillWith) {
-    fillWith = fillWith === undefined ? null : fillWith;
+    fillWith = Object.isUndefined(fillWith) ? null : fillWith;
     return this.eachSlice(number, function(slice) {
       while(slice.length < number) slice.push(fillWith);
       return slice;
     });
   },
   
-  inject: function(memo, iterator) {
+  inject: function(memo, iterator, context) {
     this.each(function(value, index) {
-      memo = iterator(memo, value, index);
+      memo = iterator.call(context, memo, value, index);
     });
     return memo;
   },
@@ -109,30 +120,33 @@ var Enumerable = {
     });
   },
   
-  max: function(iterator) {
+  max: function(iterator, context) {
+    iterator = iterator || Prototype.K;
     var result;
     this.each(function(value, index) {
-      value = (iterator || Prototype.K)(value, index);
-      if (result == undefined || value >= result)
+      value = iterator.call(context, value, index);
+      if (result == null || value >= result)
         result = value;
     });
     return result;
   },
   
-  min: function(iterator) {
+  min: function(iterator, context) {
+    iterator = iterator || Prototype.K;
     var result;
     this.each(function(value, index) {
-      value = (iterator || Prototype.K)(value, index);
-      if (result == undefined || value < result)
+      value = iterator.call(context, value, index);
+      if (result == null || value < result)
         result = value;
     });
     return result;
   },
   
-  partition: function(iterator) {
+  partition: function(iterator, context) {
+    iterator = iterator || Prototype.K;
     var trues = [], falses = [];
     this.each(function(value, index) {
-      ((iterator || Prototype.K)(value, index) ? 
+      (iterator.call(context, value, index) ?
         trues : falses).push(value);
     });
     return [trues, falses];
@@ -140,24 +154,27 @@ var Enumerable = {
   
   pluck: function(property) {
     var results = [];
-    this.each(function(value, index) {
+    this.each(function(value) {
       results.push(value[property]);
     });
     return results;
   },
   
-  reject: function(iterator) {
+  reject: function(iterator, context) {
     var results = [];
     this.each(function(value, index) {
-      if (!iterator(value, index))
+      if (!iterator.call(context, value, index))
         results.push(value);
     });
     return results;
   },
   
-  sortBy: function(iterator) {
+  sortBy: function(iterator, context) {
     return this.map(function(value, index) {
-      return {value: value, criteria: iterator(value, index)};
+      return {
+        value: value,
+        criteria: iterator.call(context, value, index)
+      };
     }).sort(function(left, right) {
       var a = left.criteria, b = right.criteria;
       return a < b ? -1 : a > b ? 1 : 0;
@@ -170,7 +187,7 @@ var Enumerable = {
   
   zip: function() {
     var iterator = Prototype.K, args = $A(arguments);
-    if (typeof args.last() == 'function')
+    if (Object.isFunction(args.last()))
       iterator = args.pop();
 
     var collections = [this].concat(args).map($A);
@@ -186,12 +203,15 @@ var Enumerable = {
   inspect: function() {
     return '#<Enumerable:' + this.toArray().inspect() + '>';
   }
-}
+};
 
 Object.extend(Enumerable, {
   map:     Enumerable.collect,
   find:    Enumerable.detect,
   select:  Enumerable.findAll,
+  filter:  Enumerable.findAll,
   member:  Enumerable.include,
-  entries: Enumerable.toArray
+  entries: Enumerable.toArray,
+  every:   Enumerable.all,
+  some:    Enumerable.any
 });

@@ -1,3 +1,598 @@
+*1.6.0.3* (September 29, 2008)
+
+* Add support for the Chrome browser in jstest.rb. (Andrew Dupont)
+
+* Workaround a JavaScript exception in Opera. (Thomas Fuchs)
+
+* Improve NodeList detection for Safari's $A function. (Garrett Smith, jddalton)
+
+* Use different tactic to sniff for Opera in order to avoid false positives in IE. (Tobie Langel, jddalton)
+
+* Rename variable in Form.Element.Serializers.select. (jddalton)
+
+* Coerce Opera's version string into a number whenever we need to sniff. (Sam Holman, jddalton)
+
+* Ensure Object.isElement handles "falsy" values properly. (kangax)
+
+* Fix exiting test task on INT signal. (Samuel Lebeau)
+
+* Fix unit test freeze in IE. (Tobie Langel)
+
+* Ensure Hash does not return keys from the prototype chain (e.g., constructor, valueOf, toString). (kangax)
+
+* Fix toString/valueOf sharing same method reference via closure in Class#addMethods. Use plain property assignment, since Object.extend fails to enumerate over toString/valueOf. (kangax)
+
+* Stop Form.Element.disable from stealing focus. (jddalton)
+
+* Ensure Element.hide and Element.show return an element, even if you pass an element ID. (Andrew Dupont)
+
+* Fix an issue where Element#getStyle('height') returns null if the height is set to "auto." (kangax, jddalton)
+
+* Add unit tests for Element#descendantOf. (jddalton)
+
+* Form#serializeElements should not serialize file inputs. (kangax, Lonesome Boy)
+
+* Fix an issue with calling Event.pointer before the DOM is loaded. (kangax, jddalton) [#4 state:resolved]
+
+* Element#down on an input element should not raise error. (humeniuc, kangax)
+
+* More unit tests for Object.isHash. (Tobie Langel)
+
+* Allow Function#argumentNames to handle line breaks between arguments. (Geoff M. Granum, Tobie Langel) [#63 state:resolved]
+
+* For consistency, add additional optional parameter "context" to Number.prototype.times. (Samuel Lebeau)
+
+* Replace all instances of foo.__proto__ by foo['__proto__'] for Caja-compliance. (Tobie Langel)
+
+* Speed up Function#argumentNames. Avoid Enum dependency. (Samuel Lebeau, Tobie Langel)
+
+* Fix Event#element accessing inexistent tagName property (e.g. when element is a document). (kangax)
+
+* Amended failing Element#identify test.
+
+* Refactor unit tests. Unit tests are now dynamically generated from a JavaScript test file and optional HTML, JS and CSS fixtures. [Tobie Langel]
+
+* Fix issue where Safari improperly reports an element as a descendant of itself.
+
+* Greatly simplify IE's implementation of Element#descendantOf.
+
+* Prevent exception when using Selector to search for an attribute that is not present. [gryn, Andrew Dupont]
+
+* Fix issues where Firefox improperly returns the wrong node from a call to Event.element. Also fixes possible exception in Event.element in IE. [jdalton, Andrew Dupont]
+
+* Fix issue where Safari 3 deletes custom properties from the document object when the page is returned to via the back button. [mzsanford, kangax, Andrew Dupont]
+
+* Integrate support for the W3C Selectors API into the Selector class. Will now use the API when possible (browser supports the API *and* recognizes the given selector). Means minor changes to the semantics of :enabled, :disabled, and :empty in order to comply with CSS spec.
+
+* Avoid re-extending element in Element#getDimensions. [kangax]
+
+* Prevent Hash#toQueryString from serializing objets. [kangax, Tobie Langel]
+
+* Fix Event#pointer in IE standard mode. Closes #9920. [kangax, Tobie Langel]
+
+* Instanciate Test.Unit.Logger on window load. [Tobie Langel]
+
+* Unit tests clean-up. [Tobie Langel]
+
+* Refactor String#escapeHTML to avoid using the `with` statement. [Tobie Langel]
+
+* Remove usage of the `with` statement from unit tests. [Tobie Langel]
+
+* Complete rewrite of the deprecation helper, now renamed UpdateHelper and useable by third-party libs. [Tobie Langel]
+
+* Make Element#writeAttribute handle frameborder attribute in IE. Closes #11068. [staaky, Tobie Langel]
+
+* Minor clean-up of selector.js. Closes #10844. [RQuadling]
+
+* Make String#unescapeHTML strip tags in IE. Closes #10173. [kangax]
+
+* Stop form observers in unit tests. Closes #10938. [kangax]
+
+* Performance improvements for Enumerables. Closes #11264. [Ben, Samuel Lebeau]
+
+* deprecation extension: mark Hash.toJSON() as removed. [Tobie Langel]
+
+* deprecation extension: mark Class.create() used without arguments as deprecated. [Tobie Langel]
+
+* deprecation extension: mark Event.unloadCache as removed rather than deprecated. [Tobie Langel]
+
+* deprecation extension: log everything *but* deprecations with console.error. [Tobie Langel]
+
+* Change deprecation extension to use Firebug's console.warn and console.error. [Andrew Dupont, Tobie Langel]
+
+* Make tagName comparisons XHTML-compliant. Closes #11012, #11013, #11014. [cfis, Tobie Langel]
+
+* Avoid breaking Element.prototype in browsers which support it. Closes #11004. [cfis, Tobie Langel]
+
+* Prevent Element#cumulativeOffset, Element#getOffsetParent, Element#positionedOffset, Element#viewportOffset and Element#clonePosition from throwing an error in IE when called on a parent-less element. Closes #9416, #10192, #10248. [ronstoney, psiborg, kangax]
+
+* Prevent Enumerable#eachSlice from entering into an endless loop if passed an argument smaller than 1. Closes #10665. [kangax, Tobie Langel]
+
+* Allow Selector to correctly detect the presence of namespaced attributes. Closes #10987. [Samuel Lebeau, Tobie Langel]
+
+* Make Element#absolutize and Element#relativize always return element. Closes #10983. [kangax]
+
+* Add deprecation extension. [Tobie Langel]
+
+*1.6.0.2* (January 25, 2008)
+
+* Update the list of officially supported browsers in the README.  [sam]
+
+* Add tests for Element#descendantOf that deal with dynamically-created elements. [Andrew Dupont]
+
+* Ensure positionedOffset properly considers "position: fixed" elements. Also ensures IE reports offsets correctly by triggering hasLayout when a "static" element has a "fixed" element as an offset parent. Closes #10644. [heygrady, kangax, Andrew Dupont]
+
+* Roll back the fix for #9609, since it does not work in Opera. Instead, avoid using "valueOf" or "toString" as field names in forms.
+
+* Prevent DOM node expandos _countedByPrototype and _prototypeEventID from being serialized into (inner|outer)HTML in IE. Closes #10909. [dcpedit, Tobie Langel, Andrew Dupont]
+
+* Make Ajax.Request#isSameOrigin JavaScript Lint compliant. [Andrew Dupont]
+
+* Properly serialize form fields with names that collide with built-in JS properties (like "length" or "toString"). Closes #9609. [gryn, kangax]
+
+* Make Object.isArray correctly identify arrays created in another frame. Closes #10374. [pointy, Dean Edwards, Andrew Dupont, Tobie Langel]
+
+* Fixed issue where Element#match failed on attribute selectors with single or double quotes. Closes #10067. [Cezary Okupski, Andrew Dupont]
+
+* Add tests for Element#match.  [Tobie Langel]
+
+* Fix Element#writeAttribute to work with 'cellspacing' and 'cellpadding' attributes in IE. Closes #9983. [/dev/urandom, Tobie Langel]
+
+* Prevent a potential security issue for cross-site ajax requests. [Alexey Feldgendler, sam, Tobie Langel]
+
+* Test for attribute existence before applying more complex CSS3 selectors. Closes #10870. [arty, Tobie Langel]
+
+* Fix "function $A" declaration inside of a conditional (confuses IE). Closes #10882. [Jacco, Andrew Dupont]
+
+* Fixed selector parsing so that "#foo [bar=baz]" is treated the same way as "#foo *[bar=baz]". Closes #10734. [jlukas, kangax, Andrew Dupont]
+
+* Fix Element#descendantOf logic in IE. Closes #10413. [martymix, kamil.szot]
+
+* Fix missing "var" in Element#insert. Closes #10838. [Lantash]
+
+* Add Test.Unit.MessageTemplate class. Add flunk, buildMessage and assertBlock methods to Test.Unit.Assertions. Refactor accordingly. [Tobie Langel]
+
+* Remove useless binding in Template#evaluate. [Tobie Langel]
+
+* Make Object.inspect more robust. [Tobie Langel]
+
+* Add a description to :test and :dist rake tasks. [Christoph Sturm]
+
+* Fix Selector.matchElements to allow for coma-separated selectors in Element#up/next/previous and Event#findElement. [Samuel Lebeau, Tobie Langel]
+
+* Test.Unit refactoring. Allow running multiple instances of Test.Unit.Runner on the same page. Allow rake to run specific testcases (e.g.: rake test BROWSERS=firefox TESTS=array TESTCASES=testUniq,test$w). Closes #10704, #10705, #10706. [nicwilliams, Tobie Langel]
+
+* Optimize property detection of outerHTML. Avoids triggering FOUC in Safari 3.0.4. Closes #10702. [subimage, Tobie Langel]
+
+* Add document.loaded, a boolean that is set to true once dom:loaded is fired. Setting document.loaded to true before the document is loaded prevents dom:loaded from being fired. [Tobie Langel]
+
+* Make Element#insert standard-compliant. Fixes an issue in FF3b2 when inserting HTML or text inside DOM nodes which aren't (yet) appended to the document. [Tobie Langel]
+
+* Add some missing semicolons to the source tree.  Closes #10659.  [Richard Quadling]
+
+* Ensure Ajax.Response#getHeader returns null for missing headers in Opera. [Tobie Langel]
+
+* Allow WEBrick to simulate slow or dropped connections and to ease Ajax request inspection. [Tobie Langel]
+
+* Ensure Ajax.Response#getHeader returns null for missing headers. [Tobie Langel]
+
+* Ensure $A creates an empty array when its argument's length is undefined. Closes #10574. [henryju, Tobie Langel]
+
+* Fix incorrect variable declaration in Event.fire. Closes #10329. [rubley]
+
+* Fix the way Selector handles [pseudoclass + combinator] with no space in between. Closes #9696. [kangax, fearphage, Andrew Dupont]
+
+* Optimize Element#up/down/next/previous. Closes #10353. [Dylan Bruzenak, Nick Stackenburg, Andrew Dupont]
+
+* Handle case-sensitivity in Selector tag names better. Closes #5052. [mexx, Andrew Dupont]
+
+*1.6.0.1* (December 4, 2007)
+
+* Change document.viewport.getDimensions to exclude scrollbars in all cases. Closes #10148, #9288. [Nick Stackenburg]
+
+* Add logic to Element#getStyle in Opera that fixes inaccurate reporting of computed 'width' and 'height' properties. [Andrew Dupont]
+
+* Ensure that an Ajax.Request's parameters option can be a Hash.  Closes #10172.  [kangax, sam] 
+
+* Ensure no comment nodes are returned in Selector queries (IE improperly returns comment nodes on getElementsByTagName("*")). Change Element#descendants to use Element#getElementsBySelector in order to avoid this issue. Closes #10220. [Jeff Gobel, Andrew Dupont]
+
+* Re-enable the XPath approach in Selector for Safari 3. Falls back to the non-XPath version when it sees a problematic token. [Andrew Dupont]
+
+* Fix a bug in the IE-specific Element#descendantOf logic. [Nicholas, Andrew Dupont]
+
+* Make Ajax.Updater clone its options hash before modifying it. Prevents memory leaks in Ajax.PeriodicalUpdater. Closes #10049 [Mislav Marohnić, Tobie Langel].
+
+* Remove useless variable in Selector.handlers.child. Closes #10006 [kuriyama]
+
+* Don't redeclare previously declared variables. Closes #10007 [kuriyama]
+
+* For consistency: use Object.isUndefined where possible. [Tobie Langel]
+
+* Make String#isJSON return false for empty or blank strings. Make Ajax.Response#responseJSON null when Ajax.Response#responseText is empty or blank. [Andrew Dupont, Thomas Fuchs, Tobie Langel]
+
+* Make Ajax.Response#_getResponseJSON use Ajax.Response#responseText. [Tobie Langel]
+
+* Remove the forked declaration of Hash#_each. As we are now systematically cloning the object upon instantiation, preventing iteration of shadowed properties is no longer required. [Tobie Langel]
+
+* Performance optimizations for Event#findElement. Make Event#findElement's expression argument optional, in which case the extended target element is returned (same as Event#element). [Tobie Langel]
+
+* Ensure Event#fire always returns an extended event. [Tobie Langel]
+
+*1.6.0* (November 6, 2007)
+
+* Fix Class#addMethods for "toString" and "valueOf" methods in Internet Explorer.  Closes #9901.  [sam]
+
+* Exclude Opera from using the sourceIndex approach in Element#descendantOf. [Tobie Langel, Andrew Dupont]
+
+* Ensure Element#hasClassName always returns a boolean. Closes #10075. [ronnylovtangen, Tobie Langel]
+
+* Ensure selectors of the form "[href]" (attribute token with no preceding tag name) work properly. Closes #8870. [chao, kangax, Andrew Dupont]
+
+* Performance optimizations for Element#descendantOf. Costliness should no longer be dependent on the difference in depth between the parent and the child. [Andrew Dupont]
+
+* Apply the workaround for the Firefox "blinking element" opacity=1 bug only to Firefox 1.5.  [Thomas Fuchs]
+
+* Add event.stopped, a boolean that is set to `true` when Event#stop is called. [Andrew Dupont, sam]
+
+* Reset the browser's dimensions to their original settings after running the DOM viewport tests.  [sam]
+
+* Fix the test runner for Firefox in Leopard.  [sam]
+
+* Use String#include wherever possible.
+
+* In IE, allow opacity to be set on elements not yet attached to the document. Closes #9904. [Thomas Fuchs, dcpedit, Tobie Langel]
+
+* Avoid the try..catch block in Ajax.Response#_getResponseJSON unless required. [Tobie Langel]
+
+* Add more tests to Element.update. Closes #9327. [Tobie Langel]
+
+* Make the Ajax.Response#headerJSON property correctly decode unicode characters. Closes #9285. [Marius Feraru, Tobie Langel]
+
+* Make sure Event and Event.extend are defined before wrapping events and calling their handler. Prevents a known Firefox bug from throwing errors on page load/unload (cf.: https://bugzilla.mozilla.org/show_bug.cgi?id=361271). Closes #5393, #9421. [staaky, John Resig, sam, Tobie Langel]
+
+* Minor cosmetic changes to the display of unit tests in terminal. [Tobie Langel]
+
+* Make submitting forms work in Opera < 9.1. Closes #9917, #9463, #8260. [kangax]
+
+* Fix template evaluation with empty replacements.  Closes #9692.  [Ryan McGeary]
+
+* Hash#toTemplateReplacements is an alias for Hash#toObject so you can once again pass hashes to Template#evaluate and String#interpolate.  [sam]
+
+* Fix Event#is(Left|Middle|Right)Click in IE.  Closes #7520 (again).  [Mislav Marohnić]
+
+*1.6.0_rc1* (October 16, 2007)
+
+* Ensure Event.* generic methods work in IE, even when the event is not extended. [Viktor Kojouharov, Andrew Dupont]
+
+* Don't translate "keypress" events into "keydown" events.  [sam]
+  Note: "keypress" is broken in Safari <= 2.x, but Event#stop has no effect on "keydown" events.
+
+* Changed Element#makeClipping to remember the original overflow value, even if it's a non-inline style. [Andrew Dupont]
+
+* Cross-browser Event#isLeftClick with the addition of is(Middle|Right)Click.  Closes #7520.  [Christophe Porteneuve, Richard Quadling, Mislav Marohnić]
+
+* Changed Selector to use the non-XPath approach for Safari 3 because of bugs in its version of document.evaluate. [Andrew Dupont]
+
+* Changed the Selector regex that tests whether the selector can be expressed in XPath; added :checked, since XPath can't detect all scenarios in which an <input> is checked. Fixes #9776. [StelardActek, kangax, Andrew Dupont]
+
+* Changed Selector pattern match so that descendant combinators after pseudoclass tokens are properly handled. Fixes #9696. [wiktor, kangax, Andrew Dupont]
+
+* Make sure $w always returns an array. [Andrew Dupont, Tobie Langel]
+
+* Add more tests to Hash. [Mislav Marohnić]
+
+* Performance enhancements to $A. Closes #9464. [Samuel Lebeau]
+
+* Make Function#argumentNames work with named functions. Closes #9826. [Samuel Lebeau]
+
+* Add Object.isHash. [Tobie Langel]
+
+* Performance improvements to String#times. [Martin Ström]
+
+* Make Ajax.Response#getHeaderJSON and Ajax.Response#getResponseJSON pseudo private instance methods. [Tobie Langel]
+
+* Make ObjectRange use the new Class.create syntax. [Mislav Marohnić]
+
+* Fix a failing ClassCreate test case in IE. [Tobie Langel]
+
+* Complete rewrite of the Hash class.
+
+  !! BACKWARDS COMPATIBILITY CHANGE !! This new version of Hash is NOT backwards compatible with the former Hash class.
+  
+  Properties are now hidden away in an private store to prevent the risk of collision with Hash's instance and mixed-in methods.
+  This implies that properties of the hash can no longer be set, accessed or deleted directly: use the new Hash#get(key), Hash#set(key, value) and Hash#unset(key) instance methods instead.
+  
+  - Make $H(object) equivalent to new Hash(object). Both now return a new (cloned) instance of Hash in all circumstances.
+  - Make Hash#merge non-destructive.
+  
+  - Add Hash#update (a destructive version of Hash#merge).
+  - Add Hash#clone (returns a new, cloned instance of Hash).
+  - Add Hash#toObject (returns a clone of the contained object).
+  - Add Hash#get(key) (returns the value of the specified property).
+  - Add Hash#set(key, value) (sets the value of the given property. returns the value).
+  - Add Hash#unset(key) (deletes the specified property and returns its value).
+  - Add Hash.from as a alias to $H for consistency with Array.from.
+  - Add Object.toQueryString.
+
+  - Deprecate Hash.toQueryString (use Object.toQueryString or the instance method Hash#toQueryString instead).
+
+  - Remove Hash#remove (use Hash#unset instead).
+  - Remove Hash.toJSON (use Object.toJSON or the instance method Hash#toJSON instead). [sam, Tobie Langel]
+
+* Element#wrap now returns the wrapper instead of the element being wrapped.  [sam]
+
+* Namespace all custom event names to avoid conflicts with native DOM events.  [sam]
+  - All custom event names MUST include a namespace.  Prefix custom event names for observe, stopObserving, and fire with the namespace followed by a colon.  E.g. document.fire("widget:activated")
+  - The "contentloaded" event is now "dom:loaded".
+  - The Event.DOMEvents array is no longer present.  If an event name does not include a namespace, the event is treated as a native event.
+
+* Clean up the new class API.  [sam, Tobie Langel]
+  - Add Class#addMethods for adding instance methods to classes.  
+  - Remove Class.extend and Class.mixin.  
+  - Class.create now takes a variable number of arguments: if the first argument is a class, the newly created class inherits from that class; all other arguments are treated as successive calls to addMethods.
+
+* Fix contentloaded event initialization in IE.  Closes #9457, #9488, #9707.  [Mislav Marohnić]
+
+* Deprecate document.getElementsByClassName and Element#getElementsByClassName since native versions return a NodeList and we can only return an Array.  Please use $$ or Element#select instead.  [sam]
+  For more information see https://bugzilla.mozilla.org/show_bug.cgi?id=390411
+
+* Fix missing "var" in selector.js.  Closes #9761.  [Tobie Langel]
+
+* Date#toJSON now returns times in UTC for better compatibility with json.js.  Closes #9332.  [Tobie Langel]
+
+* Ensure document._getElementsByXPath extends the elements it returns; fixes $$ not returning extended elements in Opera 9.2.  Closes #8843.  [jdalton]
+
+* Update Prototype.Browser.MobileSafari for iPod touch compatibility.  [sam]
+
+* Add tests for Object.extend and Object.clone.  [Tobie Langel]
+
+* Add a test for Form.Observer.  [Christoph Sturm]
+
+* Make sure setting opacity works on elements that have "no layout" in IE.  [Thomas Fuchs]
+
+* Simplify Class.create by establishing a prototype chain when subclassing.  Closes #9342.  [Ben Newman]
+
+* Fix Ajax.PeriodicalUpdater for compatibility with Ajax.Response.  Closes #9321.  [kampers]
+
+* Ensure that classes always have an initialize method.  [Mislav Marohnić]
+
+* Update Template, Selector, Ajax.*, and ObjectRange classes to use the new class system.  [Mislav Marohnić]
+
+* Change Abstract.TimedObserver to subclass PeriodicalExecuter and tweak its subclasses to use new inheritance functionality.  TimedObserver can now be stopped the same way as PeriodicalExecuter.  Closes #8589.  [Mislav Marohnić]
+
+* Fix Class.mixin to extend the class's prototype.  [Mislav Marohnić]
+
+* Fix superclass method call breakage from [7337].  [Mislav Marohnić, sam]
+
+* Change Class.extend to allow for superclass method resolution and remove Class.inherit.  Closes #9274.  [Samuel Lebeau]
+
+* Event handlers are now bound to the observed element, not the event's target element.  [Dan Webb]
+
+* Define Node constants conditionally after checking for Node.ELEMENT_NODE presence.  Add unit test to check the values of all constants.  Closes #7625.  [Mislav Marohnić]
+
+* Make sure Enumerable#include doesn't do type comparision.  [Mislav Marohnić]
+
+* Add contextmenu to Event.DOMEvents.  [Thomas Fuchs]
+
+*1.6.0_rc0* (August 15, 2007)
+
+* Fix readAttribute-related failure in form.html in IE.  [sam, Andrew Dupont]
+
+* Fix failing dom.html and selector.html tests in IE.  [Tobie Langel, Andrew Dupont]
+
+* Make sure the WebKit redefinition of Element#cumulativeOffset uses Element._returnOffset.  Closes #9245.  [mdaines]
+
+* Make sure Element#observe and Element#stopObserving are always chainable.  [sam]
+
+* Event.fire/Element#fire now returns the newly-fired event instead of the event's target element.  [sam]
+
+* Restrict Event.DOMEvents to include only events that can be supported in all browsers.  [sam]
+
+* Fix a failing test in base.html in Safari 2.  [Tobie Langel]
+
+* Fix Element#positionedOffset and Element#getOffsetParent for static elements on IE.  [Thomas Fuchs]
+
+* Make sure event handlers and their wrappers are removed from the cache by Event.stopObserving.  [sam, Severin Heiniger]
+
+* Add line numbers to failures when unit testing in Firefox.  Closes #9231.  [John Resig]
+
+* Fix Function#argumentNames for Opera and IE.  [Thomas Fuchs]
+
+* Add Object.isString, Object.isNumber, and Object.isUndefined, and clean up the source to make use of Object.isXXX where possible.  [sam]
+
+* Add the document.viewport object for querying dimensions and scroll offsets of the browser viewport.  [Andrew Dupont, Thomas Fuchs, sam]
+  Example:
+    document.viewport.getDimensions()     // { width: 1149, height: 923 }
+    document.viewport.getWidth()          // 1149
+    document.viewport.getHeight()         // 923
+    document.viewport.getScrollOffsets()  // { left: 0, top: 1592 }
+
+* Add support for brackets in quoted attribute value selectors.  Closes #9157.  [Ken Snyder]
+
+* Add some missing semicolons to the source tree.  Closes #9140.  [jdalton]
+
+* Fix event extensions and custom events firing for Safari 2.0.  [Thomas Fuchs]
+
+* Add RegExp.escape for escaping regular expression strings.  Closes #9094.  [Ken Snyder]
+
+* Make the eventName and handler arguments to Event.stopObserving optional.  If no handler is specified, all handlers for the given event are unregistered.  If no event name is specified, all observed events on the element are unregistered.  [sam]
+
+* Add cross-support for the DOMContentLoaded event through a Prototype custom event on document called "contentloaded".  The DOMContentLoaded event fires before window.load, when the entire HTML document, but not necessarily its images, stylesheets or other assets, has loaded.  Based on [6596].  [sam, Mislav Marohnić] 
+  Example:
+    document.observe("contentloaded", function() {
+      $$("a").invoke("identify"); // give all <a> tags an ID
+    });
+
+* Add Event.fire and Element.Methods.fire for firing custom events.  Prototype custom events piggyback on a real DOM event ("ondataavailable"), so they bubble and cancel.  You can fire custom events from any element, or fire global events on the document object.  Observe custom events just as you'd observe a regular DOM event.  [sam, Seth Dillingham]
+
+* Extend the event object with methods from Event.Methods and normalize it in IE.  [sam, Mislav Marohnić]
+
+* Remove support for observing the capturing phase of DOM events, since we can't support it in all browsers.  [sam]
+
+* Add Ajax.Response object which supports the following methods: responseJSON, headerJSON, getHeader, getAllHeaders and handles browser discrepancies in the other response methods. Add sanitizeJSON, evalJS and evalJSON to Ajax.Request. Closes #8122, #8006, #7295. [Tobie Langel]
+
+* Add an isRunningFromRake property to unit tests. [Tobie Langel]
+
+* Add support for Opera browser in jstest.rb. [Tobie Langel]
+
+* Inheritance branch merged to trunk; robust inheritance support for Class.create. Closes #5459. [Dean Edwards, Alex Arnell, Andrew Dupont, Mislav Mahronic]
+ - To access a method's superclass method, add "$super" as the first argument. (The naming is significant.) Works like Function#wrap.
+ - Class.create now takes two optional arguments. The first is an existing class to subclass; the second is an object literal defining the instance properties/methods. Either can be omitted. Backwards-compatible with old Class.create.
+ - Added Class.extend for dynamically adding methods to existing classes (while preserving inheritance chain). Can also be used for mixins.
+ - The 'constructor' property of a class instance always points back to the proper class. Class objects themselves have two special properties: 'superclass' and 'subclasses' (which default to 'null' and '[]', respectively). Allows for powerful introspection.
+ - Added Object.isFunction [sam]
+ 
+* Add Function#argumentNames, which returns an ordered array of the function's named arguments.  [sam]
+
+* Prevent a crash in Safari 1.3 on String#stripScripts and String#extractScripts. Closes #8332. [grant, Tobie Langel]
+
+* Add Prototype.Browser.MobileSafari which evaluates to true on the iPhone's browser.  [sam]
+
+* Optimize Selector#match and Element#match for simple selectors.  Closes #9082.  [Andrew Dupont]
+
+* Remove the dependency on Element.ClassNames from Element#addClassName/removeClassName/toggleClassName, and deprecate Element.ClassNames. Closes #9073. [Tobie Langel]
+
+* Make Element#wrap accept a second argument for setting attributes on the wrapper. Allow wrapping elements which are not part of the document. Closes #9071. [Tobie Langel]
+
+* Improvements for Element#replace, Element#update and Element#insert.  Closes #7429, #9060.  [Tobie Langel]
+  - Element#replace/update/insert uses the argument's toElement or toHTML method if present (toElement has precedence if both are present).
+  - Element#replace and Element#update now also accept DOM elements.
+  - Element#replace better handles table-related elements in IE and Opera.
+  
+* Add Object.isArray and Object.isElement (returns true if the object is a DOM node of type 1). [Tobie Langel]
+
+* Add Object.toHTML (uses the object's toHTML method if present or else passes the object to String.interpret). [Tobie Langel]
+
+* Make Element#setStyle accept a string argument of CSS rules. Deprecate uncamelized style property names when setting styles using an object (for performance reasons).  Closes #9059.  [Tobie Langel]
+  Examples:
+    $('id').setStyle('font-size: 12px; float: left; opacity: 0.5');
+    $('id').setStyle({fontSize: '12px', cssFloat: 'left', opacity: 0.5});
+
+  !! BACKWARDS COMPATIBILITY CHANGE !!
+  
+  If you have code that looks like this:
+    $('id').setStyle({'font-size': '12px'});
+  You need to replace it with either of the following:
+    $('id').setStyle({fontSize: '12px'});
+    $('id').setStyle('font-size: 12px;');
+
+* Add Element#identify, which returns the element's ID if it exists, or sets and returns a unique, auto-generated ID (of the form "anonymous_element_" + auto-incremented digit) otherwise.  Use this when you need to ensure an element has an ID.  Closes #9012.  [Jeff Watkins, sam, Tobie Langel]
+
+* Make Element#readAttribute work for cloned elements in IE. Closes #8481. [chem, Tobie Langel]
+
+* Template enhancements.  Closes #8166.  [Christophe Porteneuve]
+  - Added String#interpolate as a shortcut for new Template(...).evaluate(...). 
+  - If you pass String#interpolate or Template#evaluate an object with a toTemplateReplacements() method, the return value of that method will be used as the replacement object.
+  - You can now substitute properties of template replacement values in template strings, using dot or bracket notation (or both).  Example:
+    "#{name.last}, #{name.first[0]}. (#{location})".interpolate({
+      name: { first: "Christophe", last: "Porteneuve" }, location: "Paris"
+    }) // "Porteneuve, C. (Paris)"
+
+* Extended grep semantics.  The first argument to Enumerable#grep is now a "filter" (an object with a match() method) so you can now e.g. filter an array of DOM nodes by CSS selector.  RegExp#match is now an alias to RegExp#test, so grep can still be used to filter an array of strings with a regular expression.  Closes #7596.  [Christophe Porteneuve, sam]
+
+* Make String#scan explicitly return a string. This prevents possible issues with methods expecting input data that is typeof == 'string'. Closes #6350. [AndrewRev, Tobie Langel]
+
+* Add Array#intersect for set intersection. Returns a new array containing all items common to the array and the argument, with duplicates removed (clone of the Ruby & method).   [Thomas Fuchs]
+  Example:
+    [1,1,3,5].intersect([1,2,3]) -> [1,3]
+
+* Rename Element#getElementsBySelector to Element#select and add alias for Element#getElementsBySelector.  [Thomas Fuchs]
+
+* Add Element#adjacent as a shortcut to selecting all adjacent nodes (and their children) that match a CSS selector.  [Thomas Fuchs]
+
+* Enhance the Enumerable and Array APIs to more closely match those of JavaScript 1.6 as implemented in Firefox 1.5.  Closes #6650, #8409.  [Mislav Marohnić, Sylvain Zimmer]
+  - Add Array#lastIndexOf, and change Array#indexOf not to overwrite the native method. 
+  - Make Enumerable use Array.prototype.forEach instead of _each when possible (slight speed increase).
+  - Add "filter", "entries", "every", and "some" Array aliases. 
+  - All Enumerable methods now have an additional parameter, "context", which, if present, specifies the object to which the iterators' "this" is bound. 
+  - Function#bind and #curry now return the receiving function if the binding object is undefined.
+
+* Temporary workaround for Prototype.BrowserFeatures.SpecificElementExtensions incorrectly evaluating to true on iPhone. (needs further investigation)  [sam]
+
+* The action for Form#request defaults to the current URL if the "action" attribute is empty. (This is what most of the major browsers do.) Fixes #8483. [Tomas, Mislav Marohnić]
+
+* In form serialization, change the way submit buttons are handled. Previously all submit buttons were serialized; now Prototype serializes only the first one. Change Form#serialize and Form.serializeElements to accept a params hash. With the "hash: false" option, a serialized string is returned instead of the hash data object. With the "submit: 'foo'" option, only the submit button with the name "foo" is serialized.  References #5031.  [Mislav Marohnić]
+  Examples:
+    $('form').serialize({ submit: 'delete' })
+    $('form').serialize({ hash: false }) //-> equivalent to $('form').serialize()
+
+* Form#findFirstElement respects HTML tabindexes.  Closes #7595.  [Christophe Porteneuve]
+
+* Added Form.Element#setValue method for setting values on various form controls. Checkboxes and radio buttons respond to a boolean and multiple select boxes expect an array of values.  Closes #5902.  [Jonathan Viney, Mislav Marohnić]
+  Examples:
+    $('text_input').setValue('hello world!')
+    $('remember_me').setValue(true)
+    $('attend_classes').setValue(['cheese rolling', 'evil chemistry'])
+
+* Make document.getElementsByClassName match a subset of the WHATWG Web Applications 1.0 specification which was adopted in Firefox 3 (http://www.whatwg.org/specs/web-apps/current-work/#getelementsbyclassname). It now supports multiple class names given as a whitespace-separated list in a string. Array argument is not supported. The method will only return the nodes that match all the class names. In browsers that implement the method natively it will not be overwritten.  Closes #8401.  [Mislav Marohnić]
+  Example:
+    document.getElementsByClassName('foo bar')
+
+* Fix a Safari rendering issue when floating elements could temporarily disappear when opacity was set to 1.  Closes #7063.  References #3044, #3813, #6706.  [Thomas Fuchs, davidjrice]
+
+* Prevent a crash in Safari when calling String#evalJSON(true) on very large strings. Add String#isJSON.  Closes #7834.  [Tobie Langel]
+
+* Prevent a crash in Safari 1.3 on String#stripScripts and String#extractScripts.  Closes #8332.  [grant, Tobie Langel]
+
+* Allow JSON data to contain line breaks.  Closes #8271.  [pijyster, Tobie Langel]
+
+* Add Hash.prototype.index which returns the first found property that has a specific value.  Closes #8528.  [Thomas Fuchs, slusarz, Mislav Marohnić]
+  Examples:
+    var hash = $H({a:1,b:'2'});
+    hash.index(1)   // -> 'a'
+    hash.index('1') // -> undefined
+
+* Ensure HTMLElement exists before creating Element.extend.  [Tobie Langel]
+
+* Add Number.prototype.round/ceil/floor/abs as an aliases to the respective methods in Math. Refactor to seperate number extensions from base.js.  [Thomas Fuchs]
+
+* Make Element#absolutize and Element#relativize properly use Element#getStyle.  Closes #8580.  [Christophe Porteneuve]
+
+* Test library fixes: make rake dist work on Windows, only teardown if a browser is supported.  Closes #8463, #8498.  [Mislav Marohnić, grant]
+
+* Change Element.insert syntax to allow multiple positions.  [Thomas Fuchs]
+  Examples:
+    Element.insert('foo', {top:'bar', bottom:'baz'});
+    $('foo').insert({after: new Element('p').update('bar')});
+    Element.insert('foo', new Element('p').update('bar')); // defaults to bottom
+    Element.insert('foo', 'bar'); // defaults to bottom
+
+* String.prototype.truncate now explicitly converts its return value into a string if no truncation takes place. This prevents possible issues with methods expecting input data that is typeof == 'string'.  [Thomas Fuchs, Tobie Langel, Sam Stephenson]
+
+* Event.findElement behaves as expected when the element passed matches the given selector.  Closes #8395.  [Mislav Marohnić, Tobie Langel]
+
+* Element.setOpacity now calls removeAttribute on the filter style on IE if no more filters remain, which makes Cleartype work properly.  Closes #8376.  [alexdemi, Thomas Fuchs]
+
+* Event.findElement now uses Element#up (and as a result can take a CSS selector instead of just a tag name).  [Tobie Langel]
+
+* Minor cleanup of the position methods  [sam]
+
+* Fix Element#clonePosition to call viewportOffset.  Closes #8372.  [graemenelson, Christophe Porteneuve] 
+
+* Prevent an error being thrown by $$ when #id does not exist in $$("div #id").  Closes #8325.  [Tobie Langel, ecke]
+
+* Make Prototype.ScriptFragment behave when including Prototype inline.  [Christophe Porteneuve]
+
+* Deprecate Position (kept for backwards compatibility). Add Element#cumulativeOffset, Element#positionedOffset, Element#absolutize, Element#relativize, Element#cumulativeScrollOffset, Element#getOffsetParent, Element#viewportOffset and Element#clonePosition. [Christophe Porteneuve]
+
+* Make Element#update and Element#insert work for SELECT tags in IE and Opera. [Tobie Langel]
+
+* Make Element#insert and Element#update better handle TABLE related elements in IE and Opera. Closes #7776, #8040, #7550, #7776, #7938. [Tobie Langel]
+
+* Make Element#readAttribute('title') work in Opera. [Tobie Langel]
+
+* Make Element#replace work with form elements in Firefox and Safari. Closes #8010, #7989. [dsl239, Tobie Langel]
+
+* Add Element#wrap which wraps the element inside a new one. Closes #5732. [P. Vande, Tobie Langel]
+
+* Make Element into a constructor: new Element(tagName, attributes). Add Element#writeAttribute which accepts a hash of attributes or a name/value pair. Closes #7476. [Mislav Marohnić, haraldmartin, Tobie Langel]
+
+* Insertion overhaul: Add Element.insert(content[, position = 'bottom']). Deprecate Insertion (kept for backwards compatibility). Make Ajax.Updater option.insertion accept both Insertion.Top or the now preferred 'top'. Closes #7907. [Tobie Langel]
+
+* Refactor Element.extend and eliminate Element.extend.cache.  [sam]
+
+* Add Function#curry, Function#delay, Function#defer, and Function#wrap.  Closes #8134.  [Andrew Dupont, Tobie Langel, sam]
+
 *1.5.1* (May 1, 2007)
 
 * Don't duplicate the event argument in Function#bindAsEventListener.  Closes #6497.  [wiktor]

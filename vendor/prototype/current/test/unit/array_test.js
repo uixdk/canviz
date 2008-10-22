@@ -1,178 +1,189 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-  <title>Prototype Unit test file</title>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-  <script src="../../dist/prototype.js" type="text/javascript"></script>
-  <script src="../lib/unittest.js" type="text/javascript"></script>
-  <link rel="stylesheet" href="../test.css" type="text/css" />
-  <style type="text/css" media="screen">
-  /* <![CDATA[ */
-    #testcss1 { font-size:11px; color: #f00; }
-    #testcss2 { font-size:12px; color: #0f0; display: none; }
-  /* ]]> */
-  </style>
-</head>
-<body>
-<h1>Prototype Unit test file</h1>
-<p>
-  Test of the Array.prototype extensions
-</p>
+var globalArgsTest = 'nothing to see here';
 
-<!-- Log output -->
-<div id="testlog"> </div>
-
-<div id="test_node">22<span id="span_1"></span><span id="span_2"></span></div>
-
-<!-- Tests follow -->
-<script type="text/javascript" language="javascript" charset="utf-8">
-// <![CDATA[
-
-  var globalArgsTest = 'nothing to see here';
-
-  new Test.Unit.Runner({
+new Test.Unit.Runner({
+  test$A: function(){
+    this.assertEnumEqual([], $A({}));
+  },
+  
+  testToArrayOnArguments: function(){
+    function toArrayOnArguments(){
+      globalArgsTest = $A(arguments);
+    }
+    toArrayOnArguments();
+    this.assertEnumEqual([], globalArgsTest);
+    toArrayOnArguments('foo');
+    this.assertEnumEqual(['foo'], globalArgsTest);
+    toArrayOnArguments('foo','bar');
+    this.assertEnumEqual(['foo','bar'], globalArgsTest);
+  },
+  
+  testToArrayOnNodeList: function(){
+    // direct HTML
+    this.assertEqual(3, $A($('test_node').childNodes).length);
     
-    testToArrayOnArguments: function(){ with(this) {
-      function toArrayOnArguments(){
-        globalArgsTest = $A(arguments);
-      }
-      toArrayOnArguments();
-      assertEnumEqual([], globalArgsTest);
-      toArrayOnArguments('foo');
-      assertEnumEqual(['foo'], globalArgsTest);
-      toArrayOnArguments('foo','bar');
-      assertEnumEqual(['foo','bar'], globalArgsTest);
-    }},
+    // DOM
+    var element = document.createElement('div');
+    element.appendChild(document.createTextNode('22'));
+    (2).times(function(){ element.appendChild(document.createElement('span')) });
+    this.assertEqual(3, $A(element.childNodes).length);
     
-    testToArrayOnNodeList: function(){ with(this) {
-      // direct HTML
-      assertEqual(3, $A($('test_node').childNodes).length);
+    // HTML String
+    element = document.createElement('div');
+    $(element).update('22<span></span><span></span');
+    this.assertEqual(3, $A(element.childNodes).length);
+  },
+  
+  testClear: function(){
+    this.assertEnumEqual([], [].clear());
+    this.assertEnumEqual([], [1].clear());
+    this.assertEnumEqual([], [1,2].clear());
+  },
+  
+  testClone: function(){
+    this.assertEnumEqual([], [].clone());
+    this.assertEnumEqual([1], [1].clone());
+    this.assertEnumEqual([1,2], [1,2].clone());
+    this.assertEnumEqual([0,1,2], [0,1,2].clone());
+    var a = [0,1,2];
+    var b = a;
+    this.assertIdentical(a, b);
+    b = a.clone();
+    this.assertNotIdentical(a, b);
+  },
+  
+  testFirst: function(){
+    this.assertUndefined([].first());
+    this.assertEqual(1, [1].first());
+    this.assertEqual(1, [1,2].first());
+  },
+  
+  testLast: function(){
+    this.assertUndefined([].last());
+    this.assertEqual(1, [1].last());
+    this.assertEqual(2, [1,2].last());
+  },
+  
+  testCompact: function(){
+    this.assertEnumEqual([],      [].compact());
+    this.assertEnumEqual([1,2,3], [1,2,3].compact());
+    this.assertEnumEqual([0,1,2,3], [0,null,1,2,undefined,3].compact());
+    this.assertEnumEqual([1,2,3], [null,1,2,3,null].compact());
+  },
+  
+  testFlatten: function(){
+    this.assertEnumEqual([],      [].flatten());
+    this.assertEnumEqual([1,2,3], [1,2,3].flatten());
+    this.assertEnumEqual([1,2,3], [1,[[[2,3]]]].flatten());
+    this.assertEnumEqual([1,2,3], [[1],[2],[3]].flatten());
+    this.assertEnumEqual([1,2,3], [[[[[[[1]]]]]],2,3].flatten());
+  },
+  
+  testIndexOf: function(){
+    this.assertEqual(-1, [].indexOf(1));
+    this.assertEqual(-1, [0].indexOf(1));
+    this.assertEqual(0, [1].indexOf(1));
+    this.assertEqual(1, [0,1,2].indexOf(1));
+    this.assertEqual(0, [1,2,1].indexOf(1));
+    this.assertEqual(2, [1,2,1].indexOf(1, -1));
+    this.assertEqual(1, [undefined,null].indexOf(null));
+  },
+
+  testLastIndexOf: function(){
+    this.assertEqual(-1,[].lastIndexOf(1));
+    this.assertEqual(-1, [0].lastIndexOf(1));
+    this.assertEqual(0, [1].lastIndexOf(1));
+    this.assertEqual(2, [0,2,4,6].lastIndexOf(4));
+    this.assertEqual(3, [4,4,2,4,6].lastIndexOf(4));
+    this.assertEqual(3, [0,2,4,6].lastIndexOf(6,3));
+    this.assertEqual(-1, [0,2,4,6].lastIndexOf(6,2));
+    this.assertEqual(0, [6,2,4,6].lastIndexOf(6,2));
+    
+    var fixture = [1,2,3,4,3];
+    this.assertEqual(4, fixture.lastIndexOf(3));
+    this.assertEnumEqual([1,2,3,4,3],fixture);
+    
+    //tests from http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Objects:Array:lastIndexOf
+    var array = [2, 5, 9, 2];
+    this.assertEqual(3,array.lastIndexOf(2));
+    this.assertEqual(-1,array.lastIndexOf(7));
+    this.assertEqual(3,array.lastIndexOf(2,3));
+    this.assertEqual(0,array.lastIndexOf(2,2));
+    this.assertEqual(0,array.lastIndexOf(2,-2));
+    this.assertEqual(3,array.lastIndexOf(2,-1));
+  },
+  
+  testInspect: function(){
+    this.assertEqual('[]',[].inspect());
+    this.assertEqual('[1]',[1].inspect());
+    this.assertEqual('[\'a\']',['a'].inspect());
+    this.assertEqual('[\'a\', 1]',['a',1].inspect());
+  },
+  
+  testIntersect: function(){
+    this.assertEnumEqual([1,3], [1,1,3,5].intersect([1,2,3]));
+    this.assertEnumEqual([1], [1,1].intersect([1,1]));
+    this.assertEnumEqual([], [1,1,3,5].intersect([4]));
+    this.assertEnumEqual([], [1].intersect(['1']));
+    
+    this.assertEnumEqual(
+      ['B','C','D'], 
+      $R('A','Z').toArray().intersect($R('B','D').toArray())
+    );
+  },
+  
+  testToJSON: function(){
+    this.assertEqual('[]', [].toJSON());
+    this.assertEqual('[\"a\"]', ['a'].toJSON());
+    this.assertEqual('[\"a\", 1]', ['a', 1].toJSON());
+    this.assertEqual('[\"a\", {\"b\": null}]', ['a', {'b': null}].toJSON());
+  },
       
-      // DOM
-      var element = document.createElement('div');
-      element.appendChild(document.createTextNode('22'));
-      (2).times(function(){ element.appendChild(document.createElement('span')) });
-      assertEqual(3, $A(element.childNodes).length);
-      
-      // HTML String
-      element = document.createElement('div');
-      $(element).update('22<span></span><span></span');
-      assertEqual(3, $A(element.childNodes).length);
-    }},
-    
-    testClear: function(){ with(this) {
-      assertEnumEqual([], [].clear());
-      assertEnumEqual([], [1].clear());
-      assertEnumEqual([], [1,2].clear());
-    }},
-    
-    testClone: function(){ with(this) {
-      assertEnumEqual([], [].clone());
-      assertEnumEqual([1], [1].clone());
-      assertEnumEqual([1,2], [1,2].clone());
-      assertEnumEqual([0,1,2], [0,1,2].clone());
-      var a = [0,1,2];
-      var b = a;
-      assertIdentical(a, b);
-      b = a.clone();
-      assertNotIdentical(a, b);
-    }},
-    
-    testFirst: function(){ with(this) {
-      assertUndefined([].first());
-      assertEqual(1, [1].first());
-      assertEqual(1, [1,2].first());
-    }},
-    
-    testLast: function(){ with(this) {
-      assertUndefined([].last());
-      assertEqual(1, [1].last());
-      assertEqual(2, [1,2].last());
-    }},
-    
-    testCompact: function(){ with(this) {
-      assertEnumEqual([],      [].compact());
-      assertEnumEqual([1,2,3], [1,2,3].compact());
-      assertEnumEqual([0,1,2,3], [0,null,1,2,undefined,3].compact());
-      assertEnumEqual([1,2,3], [null,1,2,3,null].compact());
-    }},
-    
-    testFlatten: function(){ with(this) {
-      assertEnumEqual([],      [].flatten());
-      assertEnumEqual([1,2,3], [1,2,3].flatten());
-      assertEnumEqual([1,2,3], [1,[[[2,3]]]].flatten());
-      assertEnumEqual([1,2,3], [[1],[2],[3]].flatten());
-      assertEnumEqual([1,2,3], [[[[[[[1]]]]]],2,3].flatten());
-    }},
-    
-    testIndexOf: function(){ with(this) {
-      assertEqual(-1, [].indexOf(1));
-      assertEqual(-1, [0].indexOf(1));
-      assertEqual(0, [1].indexOf(1));
-      assertEqual(1, [0,1,2].indexOf(1));
-    }},
-    
-    testInspect: function(){ with(this) {
-      assertEqual('[]',[].inspect());
-      assertEqual('[1]',[1].inspect());
-      assertEqual('[\'a\']',['a'].inspect());
-      assertEqual('[\'a\', 1]',['a',1].inspect());
-    }},
-    
-    testToJSON: function(){ with(this) {
-      assertEqual('[]', [].toJSON());
-      assertEqual('[\"a\"]', ['a'].toJSON());
-      assertEqual('[\"a\", 1]', ['a', 1].toJSON());
-      assertEqual('[\"a\", {\"b\": null}]', ['a', {'b': null}].toJSON());
-    }},
-        
-    testReduce: function(){ with(this) {
-      assertUndefined([].reduce());
-      assertNull([null].reduce());
-      assertEqual(1, [1].reduce());
-      assertEnumEqual([1,2,3], [1,2,3].reduce());
-      assertEnumEqual([1,null,3], [1,null,3].reduce());
-    }},
-    
-    testReverse: function(){ with(this) {
-      assertEnumEqual([], [].reverse());
-      assertEnumEqual([1], [1].reverse());
-      assertEnumEqual([2,1], [1,2].reverse());
-      assertEnumEqual([3,2,1], [1,2,3].reverse());
-    }},
-    
-    testSize: function(){ with(this) {
-      assertEqual(4, [0, 1, 2, 3].size());
-      assertEqual(0, [].size());
-    }},
+  testReduce: function(){
+    this.assertUndefined([].reduce());
+    this.assertNull([null].reduce());
+    this.assertEqual(1, [1].reduce());
+    this.assertEnumEqual([1,2,3], [1,2,3].reduce());
+    this.assertEnumEqual([1,null,3], [1,null,3].reduce());
+  },
+  
+  testReverse: function(){
+    this.assertEnumEqual([], [].reverse());
+    this.assertEnumEqual([1], [1].reverse());
+    this.assertEnumEqual([2,1], [1,2].reverse());
+    this.assertEnumEqual([3,2,1], [1,2,3].reverse());
+  },
+  
+  testSize: function(){
+    this.assertEqual(4, [0, 1, 2, 3].size());
+    this.assertEqual(0, [].size());
+  },
 
-    testUniq: function(){ with(this) {
-      assertEnumEqual([1], [1, 1, 1].uniq());
-      assertEnumEqual([1], [1].uniq());
-      assertEnumEqual([], [].uniq());
-      assertEnumEqual([0, 1, 2, 3], [0, 1, 2, 2, 3, 0, 2].uniq());
-      assertEnumEqual([0, 1, 2, 3], [0, 0, 1, 1, 2, 3, 3, 3].uniq(true));
-    }},
-    
-    testWithout: function(){ with(this) {
-      assertEnumEqual([], [].without(0));
-      assertEnumEqual([], [0].without(0));
-      assertEnumEqual([1], [0,1].without(0));
-      assertEnumEqual([1,2], [0,1,2].without(0));
-    }},
-    
-    test$w: function(){ with(this) {
-      assertEnumEqual(['a', 'b', 'c', 'd'], $w('a b c d'));
-      assertEnumEqual([], $w(' '));
-      assertEnumEqual(['a'], $w('a'));
-      assertEnumEqual(['a'], $w('a '));
-      assertEnumEqual(['a'], $w(' a'));
-      assertEnumEqual(['a', 'b', 'c', 'd'], $w(' a   b\nc\t\nd\n'));
-    }}
-
-  }, 'testlog');
-// ]]>
-</script>
-</body>
-</html>
+  testUniq: function(){
+    this.assertEnumEqual([1], [1, 1, 1].uniq());
+    this.assertEnumEqual([1], [1].uniq());
+    this.assertEnumEqual([], [].uniq());
+    this.assertEnumEqual([0, 1, 2, 3], [0, 1, 2, 2, 3, 0, 2].uniq());
+    this.assertEnumEqual([0, 1, 2, 3], [0, 0, 1, 1, 2, 3, 3, 3].uniq(true));
+  },
+  
+  testWithout: function(){
+    this.assertEnumEqual([], [].without(0));
+    this.assertEnumEqual([], [0].without(0));
+    this.assertEnumEqual([1], [0,1].without(0));
+    this.assertEnumEqual([1,2], [0,1,2].without(0));
+  },
+  
+  test$w: function(){
+    this.assertEnumEqual(['a', 'b', 'c', 'd'], $w('a b c d'));
+    this.assertEnumEqual([], $w(' '));
+    this.assertEnumEqual([], $w(''));
+    this.assertEnumEqual([], $w(null));
+    this.assertEnumEqual([], $w(undefined));
+    this.assertEnumEqual([], $w());
+    this.assertEnumEqual([], $w(10));
+    this.assertEnumEqual(['a'], $w('a'));
+    this.assertEnumEqual(['a'], $w('a '));
+    this.assertEnumEqual(['a'], $w(' a'));
+    this.assertEnumEqual(['a', 'b', 'c', 'd'], $w(' a   b\nc\t\nd\n'));
+  }
+});

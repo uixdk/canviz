@@ -3,6 +3,7 @@ require 'thread'
 require 'webrick'
 require 'fileutils'
 include FileUtils
+require 'erb'
 
 class Browser
   def supported?; true; end
@@ -39,13 +40,39 @@ class FirefoxBrowser < Browser
   end
 
   def visit(url)
-    applescript('tell application "Firefox" to Get URL "' + url + '"') if macos? 
+    system("open -a Firefox '#{url}'") if macos?
     system("#{@path} #{url}") if windows? 
     system("firefox #{url}") if linux?
   end
 
   def to_s
     "Firefox"
+  end
+end
+
+class ChromeBrowser < Browser
+  def initialize(path = nil)
+    @path = path || File.join(
+      ENV['UserPath'] || "C:/Documents and Settings/Administrator",
+      "Local Settings",
+      "Application Data",
+      "Google",
+      "Chrome",
+      "Application",
+      "chrome.exe"
+    )
+  end
+  
+  def supported?
+    windows?
+  end
+  
+  def visit(url)
+    system("#{@path} #{url}")
+  end
+  
+  def to_s
+    "Chrome"
   end
 end
 
@@ -85,9 +112,7 @@ class IEBrowser < Browser
       ie = WIN32OLE.new('InternetExplorer.Application')
       ie.visible = true
       ie.Navigate(url)
-      while ie.ReadyState != 4 do
-        sleep(1)
-      end
+      sleep 0.01 while ie.Busy || ie.ReadyState != 4
     end
   end
 
@@ -97,7 +122,7 @@ class IEBrowser < Browser
 end
 
 class KonquerorBrowser < Browser
-  @@configDir = File.join(ENV['HOME'], '.kde', 'share', 'config')
+  @@configDir = File.join((ENV['HOME'] || ''), '.kde', 'share', 'config')
   @@globalConfig = File.join(@@configDir, 'kdeglobals')
   @@konquerorConfig = File.join(@@configDir, 'konquerorrc')
 
@@ -134,29 +159,73 @@ class KonquerorBrowser < Browser
   end
 end
 
+class OperaBrowser < Browser
+  def initialize(path='c:\Program Files\Opera\Opera.exe')
+    @path = path
+  end
+  
+  def setup
+    if windows?
+      puts %{
+        MAJOR ANNOYANCE on Windows.
+        You have to shut down Opera manually after each test
+        for the script to proceed.
+        Any suggestions on fixing this is GREATLY appreciated!
+        Thank you for your understanding.
+      }
+    end
+  end
+  
+  def visit(url)
+    applescript('tell application "Opera" to GetURL "' + url + '"') if macos? 
+    system("#{@path} #{url}") if windows? 
+    system("opera #{url}")  if linux?
+  end
+
+  def to_s
+    "Opera"
+  end
+end
+
 # shut up, webrick :-)
 class ::WEBrick::HTTPServer
   def access_log(config, req, res)
     # nop
   end
 end
+
 class ::WEBrick::BasicLog
   def log(level, data)
     # nop
   end
 end
 
-class NonCachingFileHandler < WEBrick::HTTPServlet::FileHandler
-  def do_GET(req, res)
-    super
-    
-    res['Content-Type'] = case req.path
-      when /\.js$/   then 'text/javascript'
-      when /\.html$/ then 'text/html'
-      when /\.css$/  then 'text/css'
-      else 'text/plain'
-    end
-    
+class WEBrick::HTTPResponse
+  alias send send_response
+  def send_response(socket)
+    send(socket) unless fail_silently?
+  end
+  
+  def fail_silently?
+    @fail_silently
+  end
+  
+  def fail_silently
+    @fail_silently = true
+  end
+end
+
+class WEBrick::HTTPRequest
+  def to_json
+    headers = []
+    each { |k, v| headers.push "#{k.inspect}: #{v.inspect}" }
+    headers = "{" << headers.join(', ') << "}"
+    %({ "headers": #{headers}, "body": #{body.inspect}, "method": #{request_method.inspect} })
+  end
+end
+
+class WEBrick::HTTPServlet::AbstractServlet
+  def prevent_caching(res)
     res['ETag'] = nil
     res['Last-Modified'] = Time.now + 100**4
     res['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0'
@@ -165,6 +234,62 @@ class NonCachingFileHandler < WEBrick::HTTPServlet::FileHandler
   end
 end
 
+class BasicServlet < WEBrick::HTTPServlet::AbstractServlet
+  def do_GET(req, res)
+    prevent_caching(res)
+    res['Content-Type'] = "text/plain"
+    
+    req.query.each do |k, v|
+      res[k] = v unless k == 'responseBody'
+    end
+    res.body = req.query["responseBody"]
+    
+    raise WEBrick::HTTPStatus::OK
+  end
+  
+  def do_POST(req, res)
+    do_GET(req, res)
+  end
+end
+
+class SlowServlet < BasicServlet
+  def do_GET(req, res)
+    sleep(2)
+    super
+  end
+end
+
+class DownServlet < BasicServlet
+  def do_GET(req, res)
+    res.fail_silently
+  end
+end
+
+class InspectionServlet < BasicServlet
+  def do_GET(req, res)
+    prevent_caching(res)
+    res['Content-Type'] = "application/json"
+    res.body = req.to_json
+    raise WEBrick::HTTPStatus::OK
+  end
+end
+
+class NonCachingFileHandler < WEBrick::HTTPServlet::FileHandler
+  def do_GET(req, res)
+    super
+    set_default_content_type(res, req.path)
+    prevent_caching(res)
+  end
+  
+  def set_default_content_type(res, path)
+    res['Content-Type'] = case path
+      when /\.js$/   then 'text/javascript'
+      when /\.html$/ then 'text/html'
+      when /\.css$/  then 'text/css'
+      else 'text/plain'
+    end
+  end
+end
 
 class JavaScriptTestTask < ::Rake::TaskLib
 
@@ -175,47 +300,59 @@ class JavaScriptTestTask < ::Rake::TaskLib
 
     @queue = Queue.new
 
-    result = []
-
     @server = WEBrick::HTTPServer.new(:Port => 4711) # TODO: make port configurable
     @server.mount_proc("/results") do |req, res|
-      @queue.push(req.query['result'])
+      @queue.push(req)
       res.body = "OK"
     end
-    @server.mount_proc("/content-type") do |req, res|
-      res.body = req["content-type"]
-    end
-    
+    @server.mount("/response", BasicServlet)
+    @server.mount("/slow", SlowServlet)
+    @server.mount("/down", DownServlet)
+    @server.mount("/inspect", InspectionServlet)
     yield self if block_given?
     define
   end
 
   def define
     task @name do
-      trap("INT") { @server.shutdown }
+      trap("INT") { @server.shutdown; exit }
       t = Thread.new { @server.start }
-
+      
       # run all combinations of browsers and tests
       @browsers.each do |browser|
         if browser.supported?
+          t0 = Time.now
+          test_suite_results = TestSuiteResults.new
+
           browser.setup
+          puts "\nStarted tests in #{browser}."
+          
           @tests.each do |test|
-            browser.visit("http://localhost:4711#{test}?resultsURL=http://localhost:4711/results&t=" + ("%.6f" % Time.now.to_f))
-            result = @queue.pop
-            puts "#{test} on #{browser}: #{result}"
+            browser.visit(get_url(test))
+            results = TestResults.new(@queue.pop.query, test[:url])
+            print results
+            test_suite_results << results
           end
+          
+          print "\nFinished in #{Time.now - t0} seconds."
+          print test_suite_results
           browser.teardown
         else
-          puts "Skipping #{browser}, not supported on this OS"
+          puts "\nSkipping #{browser}, not supported on this OS."
         end
-        browser.teardown
       end
 
       @server.shutdown
       t.join
     end
   end
-
+  
+  def get_url(test)
+    params = "resultsURL=http://localhost:4711/results&t=" + ("%.6f" % Time.now.to_f)
+    params << "&tests=#{test[:testcases]}" unless test[:testcases] == :all
+    "http://localhost:4711#{test[:url]}?#{params}"
+  end
+  
   def mount(path, dir=nil)
     dir = Dir.pwd + path unless dir
 
@@ -223,9 +360,11 @@ class JavaScriptTestTask < ::Rake::TaskLib
     @server.mount(path, NonCachingFileHandler, dir)
   end
 
-  # test should be specified as a url
-  def run(test)
-    @tests<<test
+  # test should be specified as a hash of the form
+  # {:url => "url", :testcases => "testFoo,testBar"}.
+  # specifying :testcases is optional
+  def run(url, testcases = :all)
+    @tests <<  { :url => url, :testcases => testcases }
   end
 
   def browser(browser)
@@ -239,10 +378,127 @@ class JavaScriptTestTask < ::Rake::TaskLib
           IEBrowser.new
         when :konqueror
           KonquerorBrowser.new
+        when :opera
+          OperaBrowser.new
+        when :chrome
+          ChromeBrowser.new
         else
           browser
       end
 
     @browsers<<browser
+  end
+end
+
+class TestResults
+  attr_reader :tests, :assertions, :failures, :errors, :filename
+  def initialize(query, filename)
+    @tests      = query['tests'].to_i
+    @assertions = query['assertions'].to_i
+    @failures   = query['failures'].to_i
+    @errors     = query['errors'].to_i
+    @filename   = filename
+  end
+  
+  def error?
+    @errors > 0
+  end
+  
+  def failure?
+    @failures > 0
+  end
+  
+  def to_s
+    return "E" if error?
+    return "F" if failure?
+    "."
+  end
+end
+
+class TestSuiteResults
+  def initialize
+    @tests      = 0
+    @assertions = 0
+    @failures   = 0
+    @errors     = 0
+    @error_files   = []
+    @failure_files = []
+  end
+  
+  def <<(result)
+    @tests      += result.tests
+    @assertions += result.assertions
+    @failures   += result.failures
+    @errors     += result.errors
+    @error_files.push(result.filename)   if result.error?
+    @failure_files.push(result.filename) if result.failure?
+  end
+  
+  def error?
+    @errors > 0
+  end
+  
+  def failure?
+    @failures > 0
+  end
+  
+  def to_s
+    str = ""
+    str << "\n  Failures: #{@failure_files.join(', ')}" if failure?
+    str << "\n  Errors:   #{@error_files.join(', ')}" if error?
+    "#{str}\n#{summary}\n\n"
+  end
+  
+  def summary
+    "#{@tests} tests, #{@assertions} assertions, #{@failures} failures, #{@errors} errors."
+  end
+end
+
+class PageBuilder
+  UNITTEST_DIR  = File.expand_path('test')
+  FIXTURES_DIR  = File.join(UNITTEST_DIR, 'unit', 'fixtures')
+  TMP_DIR       = File.join(UNITTEST_DIR, 'unit', 'tmp')
+  TEMPLATES_DIR = File.join(UNITTEST_DIR, 'lib', 'templates')
+  
+  def initialize(filename, template = 'default.erb')
+    @filename          = filename
+    @template          = File.join(self.class::TEMPLATES_DIR, template)
+    @js_filename       = File.basename(@filename)
+    @basename          = @js_filename.sub('_test.js', '')
+  end
+  
+  def html_fixtures
+    content = ""
+    file = File.join(FIXTURES_DIR, "#{@basename}.html")
+    File.open(file).each { |l| content << l } if File.exists?(file)
+    content
+  end
+  
+  def external_fixtures(extension)
+    filename = "#{@basename}.#{extension}"
+    File.exists?(File.join(FIXTURES_DIR, filename)) ? filename : nil
+  end
+  
+  def render
+    @title                 = @basename.gsub('_', ' ').strip.capitalize
+    @html_fixtures         = html_fixtures
+    @js_fixtures_filename  = external_fixtures('js')
+    @css_fixtures_filename = external_fixtures('css')
+    
+    File.open(destination, 'w+') do |file|
+      file << ERB.new(IO.read(@template), nil, '%').result(binding)
+    end
+  end
+  
+  def destination
+    name_file(:ext => 'html')
+  end
+  
+  def name_file(options = {})
+    prefix = options[:prefix] ? "#{options[:prefix]}_" : ""
+    suffix = options[:suffix] ? "_#{options[:suffix]}" : ""
+    ext    = options[:ext] ? options[:ext] : "js"
+    filename = File.basename(@filename, '.js')
+    File.join(TMP_DIR, "#{prefix}#{filename}#{suffix}.#{ext}")
   end
 end

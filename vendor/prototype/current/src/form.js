@@ -4,13 +4,19 @@ var Form = {
     return form;
   },
   
-  serializeElements: function(elements, getHash) {
-    var data = elements.inject({}, function(result, element) {
+  serializeElements: function(elements, options) {
+    if (typeof options != 'object') options = { hash: !!options };
+    else if (Object.isUndefined(options.hash)) options.hash = true;
+    var key, value, submitted = false, submit = options.submit;
+    
+    var data = elements.inject({ }, function(result, element) {
       if (!element.disabled && element.name) {
-        var key = element.name, value = $(element).getValue();
-        if (value != null) { 
-         	if (key in result) {
-            if (result[key].constructor != Array) result[key] = [result[key]];
+        key = element.name; value = $(element).getValue();
+        if (value != null && element.type != 'file' && (element.type != 'submit' || (!submitted &&
+            submit !== false && (!submit || key == submit) && (submitted = true)))) { 
+          if (key in result) {
+            // a key is already present; construct an array of values
+            if (!Object.isArray(result[key])) result[key] = [result[key]];
             result[key].push(value);
           }
           else result[key] = value;
@@ -19,13 +25,13 @@ var Form = {
       return result;
     });
     
-    return getHash ? data : Hash.toQueryString(data);
+    return options.hash ? data : Object.toQueryString(data);
   }
 };
 
 Form.Methods = {
-  serialize: function(form, getHash) {
-    return Form.serializeElements(Form.getElements(form), getHash);
+  serialize: function(form, options) {
+    return Form.serializeElements(Form.getElements(form), options);
   },
   
   getElements: function(form) {
@@ -67,9 +73,15 @@ Form.Methods = {
   },
 
   findFirstElement: function(form) {
-    return $(form).getElements().find(function(element) {
-      return element.type != 'hidden' && !element.disabled &&
-        ['input', 'select', 'textarea'].include(element.tagName.toLowerCase());
+    var elements = $(form).getElements().findAll(function(element) {
+      return 'hidden' != element.type && !element.disabled;
+    });
+    var firstByIndex = elements.findAll(function(element) {
+      return element.hasAttribute('tabIndex') && element.tabIndex >= 0;
+    }).sortBy(function(element) { return element.tabIndex }).first();
+    
+    return firstByIndex ? firstByIndex : elements.find(function(element) {
+      return ['input', 'select', 'textarea'].include(element.tagName.toLowerCase());
     });
   },
 
@@ -80,22 +92,23 @@ Form.Methods = {
   },
   
   request: function(form, options) {
-    form = $(form), options = Object.clone(options || {});
+    form = $(form), options = Object.clone(options || { });
 
-    var params = options.parameters;
+    var params = options.parameters, action = form.readAttribute('action') || '';
+    if (action.blank()) action = window.location.href;
     options.parameters = form.serialize(true);
     
     if (params) {
-      if (typeof params == 'string') params = params.toQueryParams();
+      if (Object.isString(params)) params = params.toQueryParams();
       Object.extend(options.parameters, params);
     }
     
     if (form.hasAttribute('method') && !options.method)
       options.method = form.method;
     
-    return new Ajax.Request(form.readAttribute('action'), options);
+    return new Ajax.Request(action, options);
   }
-}
+};
 
 /*--------------------------------------------------------------------------*/
 
@@ -109,7 +122,7 @@ Form.Element = {
     $(element).select();
     return element;
   }
-}
+};
 
 Form.Element.Methods = {
   serialize: function(element) {
@@ -117,9 +130,9 @@ Form.Element.Methods = {
     if (!element.disabled && element.name) {
       var value = element.getValue();
       if (value != undefined) {
-        var pair = {};
+        var pair = { };
         pair[element.name] = value;
-        return Hash.toQueryString(pair);
+        return Object.toQueryString(pair);
       }
     }
     return '';
@@ -129,6 +142,13 @@ Form.Element.Methods = {
     element = $(element);
     var method = element.tagName.toLowerCase();
     return Form.Element.Serializers[method](element);
+  },
+
+  setValue: function(element, value) {
+    element = $(element);
+    var method = element.tagName.toLowerCase();
+    Form.Element.Serializers[method](element, value);
+    return element;
   },
 
   clear: function(element) {
@@ -145,15 +165,14 @@ Form.Element.Methods = {
     try {
       element.focus();
       if (element.select && (element.tagName.toLowerCase() != 'input' ||
-        !['button', 'reset', 'submit'].include(element.type)))
+          !['button', 'reset', 'submit'].include(element.type)))
         element.select();
-    } catch (e) {}
+    } catch (e) { }
     return element;
   },
   
   disable: function(element) {
     element = $(element);
-    element.blur();
     element.disabled = true;
     return element;
   },
@@ -163,7 +182,7 @@ Form.Element.Methods = {
     element.disabled = false;
     return element;
   }
-}
+};
 
 /*--------------------------------------------------------------------------*/
 
@@ -173,27 +192,44 @@ var $F = Form.Element.Methods.getValue;
 /*--------------------------------------------------------------------------*/
 
 Form.Element.Serializers = {
-  input: function(element) {
+  input: function(element, value) {
     switch (element.type.toLowerCase()) {
       case 'checkbox':  
       case 'radio':
-        return Form.Element.Serializers.inputSelector(element);
+        return Form.Element.Serializers.inputSelector(element, value);
       default:
-        return Form.Element.Serializers.textarea(element);
+        return Form.Element.Serializers.textarea(element, value);
     }
   },
 
-  inputSelector: function(element) {
-    return element.checked ? element.value : null;
+  inputSelector: function(element, value) {
+    if (Object.isUndefined(value)) return element.checked ? element.value : null;
+    else element.checked = !!value;
   },
 
-  textarea: function(element) {
-    return element.value;
+  textarea: function(element, value) {
+    if (Object.isUndefined(value)) return element.value;
+    else element.value = value;
   },
   
-  select: function(element) {
-    return this[element.type == 'select-one' ? 
-      'selectOne' : 'selectMany'](element);
+  select: function(element, value) {
+    if (Object.isUndefined(value))
+      return this[element.type == 'select-one' ? 
+        'selectOne' : 'selectMany'](element);
+    else {
+      var opt, currentValue, single = !Object.isArray(value);
+      for (var i = 0, length = element.length; i < length; i++) {
+        opt = element.options[i];
+        currentValue = this.optionValue(opt);
+        if (single) {
+          if (currentValue == value) {
+            opt.selected = true;
+            return;
+          }
+        }
+        else opt.selected = value.include(currentValue);
+      }
+    }
   },
   
   selectOne: function(element) {
@@ -216,45 +252,34 @@ Form.Element.Serializers = {
     // extend element because hasAttribute may not be native
     return Element.extend(opt).hasAttribute('value') ? opt.value : opt.text;
   }
-}
+};
 
 /*--------------------------------------------------------------------------*/
 
-Abstract.TimedObserver = function() {}
-Abstract.TimedObserver.prototype = {
-  initialize: function(element, frequency, callback) {
-    this.frequency = frequency;
+Abstract.TimedObserver = Class.create(PeriodicalExecuter, {
+  initialize: function($super, element, frequency, callback) {
+    $super(callback, frequency);
     this.element   = $(element);
-    this.callback  = callback;
-    
     this.lastValue = this.getValue();
-    this.registerCallback();
   },
   
-  registerCallback: function() {
-    setInterval(this.onTimerEvent.bind(this), this.frequency * 1000);
-  },
-  
-  onTimerEvent: function() {
+  execute: function() {
     var value = this.getValue();
-    var changed = ('string' == typeof this.lastValue && 'string' == typeof value
-      ? this.lastValue != value : String(this.lastValue) != String(value));
-    if (changed) {
+    if (Object.isString(this.lastValue) && Object.isString(value) ?
+        this.lastValue != value : String(this.lastValue) != String(value)) {
       this.callback(this.element, value);
       this.lastValue = value;
     }
   }
-}
+});
 
-Form.Element.Observer = Class.create();
-Form.Element.Observer.prototype = Object.extend(new Abstract.TimedObserver(), {
+Form.Element.Observer = Class.create(Abstract.TimedObserver, {
   getValue: function() {
     return Form.Element.getValue(this.element);
   }
 });
 
-Form.Observer = Class.create();
-Form.Observer.prototype = Object.extend(new Abstract.TimedObserver(), {
+Form.Observer = Class.create(Abstract.TimedObserver, {
   getValue: function() {
     return Form.serialize(this.element);
   }
@@ -262,8 +287,7 @@ Form.Observer.prototype = Object.extend(new Abstract.TimedObserver(), {
 
 /*--------------------------------------------------------------------------*/
 
-Abstract.EventObserver = function() {}
-Abstract.EventObserver.prototype = {
+Abstract.EventObserver = Class.create({
   initialize: function(element, callback) {
     this.element  = $(element);
     this.callback = callback;
@@ -284,7 +308,7 @@ Abstract.EventObserver.prototype = {
   },
   
   registerFormCallbacks: function() {
-    Form.getElements(this.element).each(this.registerCallback.bind(this));
+    Form.getElements(this.element).each(this.registerCallback, this);
   },
   
   registerCallback: function(element) {
@@ -300,17 +324,15 @@ Abstract.EventObserver.prototype = {
       }
     }    
   }
-}
+});
 
-Form.Element.EventObserver = Class.create();
-Form.Element.EventObserver.prototype = Object.extend(new Abstract.EventObserver(), {
+Form.Element.EventObserver = Class.create(Abstract.EventObserver, {
   getValue: function() {
     return Form.Element.getValue(this.element);
   }
 });
 
-Form.EventObserver = Class.create();
-Form.EventObserver.prototype = Object.extend(new Abstract.EventObserver(), {
+Form.EventObserver = Class.create(Abstract.EventObserver, {
   getValue: function() {
     return Form.serialize(this.element);
   }
