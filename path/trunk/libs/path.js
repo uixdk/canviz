@@ -1,7 +1,6 @@
 // $Id$
 
-var Point = Class.create();
-Point.prototype = {
+var Point = Class.create({
 	initialize: function(x, y) {
 		this.x = x;
 		this.y = y;
@@ -19,10 +18,9 @@ Point.prototype = {
 		ctx.moveTo(this.x, this.y);
 		ctx.lineTo(this.x + 0.001, this.y);
 	}
-}
+});
 
-var Bezier = Class.create();
-Bezier.prototype = {
+var Bezier = Class.create({
 	initialize: function(points) {
 		this.points = points;
 		this.order = points.length;
@@ -273,10 +271,9 @@ Bezier.prototype = {
 		}.bind(this));
 		return markedEvery.nextDistance;
 	}
-}
+});
 
-var Path = Class.create();
-Path.prototype = {
+var Path = Class.create({
 	initialize: function(segments) {
 		this.segments = segments || [];
 	},
@@ -312,11 +309,9 @@ Path.prototype = {
 			firstDistance = segment.drawDotted(ctx, dotSpacing, firstDistance);
 		});
 	}
-}
+});
 
-var Ellipse = Class.create();
-Ellipse.prototype = new Path();
-Object.extend(Ellipse.prototype, {
+var Ellipse = Class.create(Path, {
 	KAPPA: 0.5522847498,
 	initialize: function(cx, cy, rx, ry) {
 		this.cx = cx; // center x
