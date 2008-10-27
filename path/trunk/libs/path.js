@@ -277,17 +277,20 @@ var Path = Class.create({
 	initialize: function(segments) {
 		this.segments = segments || [];
 	},
+	setupSegments: function() {},
 	// Based on Oliver Steele's bezier.js library.
 	addBezier: function(pointsOrBezier) {
 		this.segments.push(pointsOrBezier instanceof Array ? new Bezier(pointsOrBezier) : pointsOrBezier);
 	},
 	offset: function(dx, dy) {
+		if (0 == this.segments.length) this.setupSegments();
 		this.segments.each(function(segment) {
 			segment.offset(dx, dy);
 		});
 	},
 	// Based on Oliver Steele's bezier.js library.
 	draw: function(ctx) {
+		if (0 == this.segments.length) this.setupSegments();
 		var moveTo = true;
 		this.segments.each(function(segment) {
 			segment.draw(ctx, moveTo);
@@ -295,6 +298,7 @@ var Path = Class.create({
 		});
 	},
 	drawDashed: function(ctx, dashLength, firstDistance, drawFirst) {
+		if (0 == this.segments.length) this.setupSegments();
 		var info = {
 			drawFirst: ('undefined' == typeof drawFirst) ? true : drawFirst,
 			firstDistance: firstDistance || dashLength
@@ -304,6 +308,7 @@ var Path = Class.create({
 		});
 	},
 	drawDotted: function(ctx, dotSpacing, firstDistance) {
+		if (0 == this.segments.length) this.setupSegments();
 		if (!firstDistance) firstDistance = dotSpacing;
 		this.segments.each(function(segment) {
 			firstDistance = segment.drawDotted(ctx, dotSpacing, firstDistance);
@@ -313,36 +318,37 @@ var Path = Class.create({
 
 var Ellipse = Class.create(Path, {
 	KAPPA: 0.5522847498,
-	initialize: function(cx, cy, rx, ry) {
+	initialize: function($super, cx, cy, rx, ry) {
 		this.cx = cx; // center x
 		this.cy = cy; // center y
 		this.rx = rx; // radius x
 		this.ry = ry; // radius y
-		this.segments = [
-			new Bezier([
-				new Point(cx, cy - ry),
-				new Point(cx + this.KAPPA * rx, cy - ry),
-				new Point(cx + rx, cy - this.KAPPA * ry),
-				new Point(cx + rx, cy)
-			]),
-			new Bezier([
-				new Point(cx + rx, cy),
-				new Point(cx + rx, cy + this.KAPPA * ry),
-				new Point(cx + this.KAPPA * rx, cy + ry),
-				new Point(cx, cy + ry)
-			]),
-			new Bezier([
-				new Point(cx, cy + ry),
-				new Point(cx - this.KAPPA * rx, cy + ry),
-				new Point(cx - rx, cy + this.KAPPA * ry),
-				new Point(cx - rx, cy)
-			]),
-			new Bezier([
-				new Point(cx - rx, cy),
-				new Point(cx - rx, cy - this.KAPPA * ry),
-				new Point(cx - this.KAPPA * rx, cy - ry),
-				new Point(cx, cy - ry)
-			])
-		];
+		$super();
+	},
+	setupSegments: function() {
+		this.addBezier([
+			new Point(this.cx, this.cy - this.ry),
+			new Point(this.cx + this.KAPPA * this.rx, this.cy - this.ry),
+			new Point(this.cx + this.rx, this.cy - this.KAPPA * this.ry),
+			new Point(this.cx + this.rx, this.cy)
+		]);
+		this.addBezier([
+			new Point(this.cx + this.rx, this.cy),
+			new Point(this.cx + this.rx, this.cy + this.KAPPA * this.ry),
+			new Point(this.cx + this.KAPPA * this.rx, this.cy + this.ry),
+			new Point(this.cx, this.cy + this.ry)
+		]);
+		this.addBezier([
+			new Point(this.cx, this.cy + this.ry),
+			new Point(this.cx - this.KAPPA * this.rx, this.cy + this.ry),
+			new Point(this.cx - this.rx, this.cy + this.KAPPA * this.ry),
+			new Point(this.cx - this.rx, this.cy)
+		]);
+		this.addBezier([
+			new Point(this.cx - this.rx, this.cy),
+			new Point(this.cx - this.rx, this.cy - this.KAPPA * this.ry),
+			new Point(this.cx - this.KAPPA * this.rx, this.cy - this.ry),
+			new Point(this.cx, this.cy - this.ry)
+		]);
 	}
 });
