@@ -316,6 +316,42 @@ var Path = Class.create({
 	}
 });
 
+var Rect = Class.create(Path, {
+	initialize: function($super, l, t, r, b) {
+		this.l = l;
+		this.t = t;
+		this.r = r;
+		this.b = b;
+		$super();
+	},
+	getWidth: function() {
+		return this.r - this.l;
+	},
+	getHeight: function() {
+		return this.b - this.t;
+	},
+	setupSegments: function() {
+		var w = this.getWidth();
+		var h = this.getHeight();
+		this.addBezier([
+			new Point(this.l, this.t),
+			new Point(this.l + w, this.t)
+		]);
+		this.addBezier([
+			new Point(this.l + w, this.t),
+			new Point(this.l + w, this.t + h)
+		]);
+		this.addBezier([
+			new Point(this.l + w, this.t + h),
+			new Point(this.l, this.t + h)
+		]);
+		this.addBezier([
+			new Point(this.l, this.t + h),
+			new Point(this.l, this.t)
+		]);
+	}
+});
+
 var Ellipse = Class.create(Path, {
 	KAPPA: 0.5522847498,
 	initialize: function($super, cx, cy, rx, ry) {
