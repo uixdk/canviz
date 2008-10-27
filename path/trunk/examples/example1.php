@@ -44,7 +44,8 @@ function newTestPaths() {
 				new Point(300, 160)
 			])
 		]),
-		new Ellipse(300, 80, 90, 40)
+		new Ellipse(300, 80, 90, 40),
+		new Rect(40, 124, 170, 170)
 	];
 }
 var testPaths = [], spacing = 30, firstDistance = spacing, drawFirst = true, ctx, animating = false;
