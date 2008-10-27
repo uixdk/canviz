@@ -19,35 +19,35 @@ header('Content-Type: text/html; charset=utf-8');
 	<script type="text/javascript" src="prototype/prototype.js"></script>
 	<script type="text/javascript" src="path/path.js"></script>
 	<script type="text/javascript"><!--
-function newTestPath() {
-	return new Path([
-		new Bezier([
-			new Point(150,80),
-			new Point(80,120),
-			new Point(10,80)
+function newTestPaths() {
+	return [
+		new Path([
+			new Bezier([
+				new Point(150, 80),
+				new Point(80, 120),
+				new Point(10, 80)
+			]),
+			new Bezier([
+				new Point(10, 80),
+				new Point(10, 10)
+			]),
+			new Bezier([
+				new Point(10, 10),
+				new Point(340, 10),
+				new Point(60, 200),
+				new Point(390, 200)
+			]),
+			new Bezier([
+				new Point(390, 200),
+				new Point(390, 140),
+				new Point(330, 140),
+				new Point(300, 160)
+			])
 		]),
-		new Bezier([
-			new Point(10,80),
-			new Point(10,10)
-		]),
-		new Bezier([
-			new Point(10,10),
-			new Point(340,10),
-			new Point(60,200),
-			new Point(390,200)
-		]),
-		new Bezier([
-			new Point(390,200),
-			new Point(390,140),
-			new Point(330,140),
-			new Point(300,160)
-		])
-	]);
+		new Ellipse(300, 80, 90, 40)
+	];
 }
-function newTestEllipse() {
-	return new Ellipse(300, 80, 90, 40);
-}
-var path1, path2, spacing = 30, firstDistance = spacing, drawFirst = true, ctx, animating = false;
+var testPaths = [], spacing = 30, firstDistance = spacing, drawFirst = true, ctx, animating = false;
 function startStop() {
 	if (animating) {
 		$('start_stop_btn').value = 'Animate';
@@ -67,32 +67,32 @@ function drawFrame() {
 	ctx.clearRect(0, 0, 400, 400);
 	
 	ctx.strokeStyle = 'rgb(233,233,233)';
+	
 	ctx.beginPath();
-	path1.draw(ctx);
-	ellipse1.draw(ctx);
+	testPaths.each(function(paths) {
+		paths.each(function(path) {
+			path.draw(ctx);
+		});
+	});
 	ctx.stroke();
 	
 	ctx.strokeStyle = 'rgb(100,100,100)';
+	
 	ctx.beginPath();
 	var before = new Date();
-	path1.drawDotted(ctx, spacing, firstDistance);
+	testPaths[0].each(function(path) {
+		path.drawDotted(ctx, spacing, firstDistance);
+	});
 	var after = new Date();
-	ellipse1.drawDotted(ctx, spacing, firstDistance);
 	ctx.stroke();
 	if (!animating) $('output').innerHTML += 'dotted took ' + (after.getTime() - before.getTime())/1000 + ' seconds<br/>';
 	
-	ctx.strokeStyle = 'rgb(233,233,233)';
 	ctx.beginPath();
-	path2.draw(ctx);
-	ellipse2.draw(ctx);
-	ctx.stroke();
-	
-	ctx.strokeStyle = 'rgb(100,100,100)';
-	ctx.beginPath();
-	var before = new Date();
-	path2.drawDashed(ctx, spacing, firstDistance, drawFirst);
-	var after = new Date();
-	ellipse2.drawDashed(ctx, spacing, firstDistance, drawFirst);
+	before = new Date();
+	testPaths[1].each(function(path) {
+		path.drawDashed(ctx, spacing, firstDistance, drawFirst);
+	});
+	after = new Date();
 	ctx.stroke();
 	if (!animating) $('output').innerHTML += 'dashed took ' + (after.getTime() - before.getTime())/1000 + ' seconds<br/>';
 	
@@ -110,13 +110,11 @@ function init() {
 		ctx.lineWidth = 4;
 		ctx.lineCap = 'round';
 		
-		path1 = newTestPath();
-		ellipse1 = newTestEllipse();
-		
-		path2 = newTestPath();
-		path2.offset(0, 190);
-		ellipse2 = newTestEllipse();
-		ellipse2.offset(0, 190);
+		testPaths[0] = newTestPaths();
+		testPaths[1] = newTestPaths();
+		testPaths[1].each(function(path) {
+			path.offset(0, 190);
+		});
 		
 		$('start_stop_btn').value = animating ? 'Stop' : 'Animate';
 		drawFrame();
