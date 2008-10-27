@@ -72,18 +72,6 @@ function drawFrame() {
 	ellipse1.draw(ctx);
 	ctx.stroke();
 	
-/*
-	var halves = path1.segments[2].split(0.25);
-	ctx.strokeStyle = 'rgb(100,220,100)';
-	ctx.beginPath();
-	halves.left.draw(ctx);
-	ctx.stroke();
-	ctx.strokeStyle = 'rgb(100,100,220)';
-	ctx.beginPath();
-	halves.right.draw(ctx);
-	ctx.stroke();
-*/
-	
 	ctx.strokeStyle = 'rgb(100,100,100)';
 	ctx.beginPath();
 	var before = new Date();
