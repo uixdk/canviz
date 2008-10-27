@@ -17,7 +17,7 @@ header('Content-Type: text/html; charset=utf-8');
 --></style>
 	<!--[if IE]><script type="text/javascript" src="excanvas/excanvas.js"></script><![endif]-->
 	<script type="text/javascript" src="prototype/prototype.js"></script>
-	<script type="text/javascript" src="path/path.js"></script>
+	<script type="text/javascript" src="../libs/path.js"></script>
 	<script type="text/javascript"><!--
 function newTestPaths() {
 	return [
