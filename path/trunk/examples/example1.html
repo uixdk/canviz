@@ -65,6 +65,7 @@ function drawFrame() {
 	var output = '';
 	
 	ctx.lineWidth = 4;
+	var halfLineWidth = ctx.lineWidth / 2;
 	
 	ctx.strokeStyle = 'rgb(233,233,233)';
 	
@@ -103,7 +104,7 @@ function drawFrame() {
 		ctx.beginPath();
 		testPaths.each(function(paths) {
 			paths.each(function(path) {
-				path.getBB().draw(ctx);
+				path.getBB().inset(-halfLineWidth, -halfLineWidth).draw(ctx);
 			});
 		});
 		ctx.stroke();
@@ -115,7 +116,7 @@ function drawFrame() {
 		testPaths.each(function(paths) {
 			paths.each(function(path) {
 				path.segments.each(function(segment) {
-					segment.getBB().drawDashed(ctx, 8);
+					segment.getBB().inset(-halfLineWidth, -halfLineWidth).drawDashed(ctx, 8);
 				});
 			});
 		});
