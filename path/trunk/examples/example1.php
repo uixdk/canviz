@@ -68,6 +68,8 @@ function drawFrame() {
 	ctx.clearRect(0, 0, 400, 400);
 	var output = '';
 	
+	ctx.lineWidth = 4;
+	
 	ctx.strokeStyle = 'rgb(233,233,233)';
 	
 	ctx.beginPath();
@@ -98,6 +100,71 @@ function drawFrame() {
 	ctx.stroke();
 	if (!animating) output += 'dashed took ' + (after.getTime() - before.getTime())/1000 + ' seconds<br/>';
 	
+	ctx.lineWidth = 1;
+	
+	if ($F('path_bboxes')) {
+		ctx.strokeStyle = '#0c0';
+		ctx.beginPath();
+		testPaths.each(function(paths) {
+			paths.each(function(path) {
+				path.getBB().draw(ctx);
+			});
+		});
+		ctx.stroke();
+	}
+	
+	if ($F('segment_bboxes')) {
+		ctx.strokeStyle = '#c0f';
+		ctx.beginPath();
+		testPaths.each(function(paths) {
+			paths.each(function(path) {
+				path.segments.each(function(segment) {
+					segment.getBB().drawDashed(ctx, 8);
+				});
+			});
+		});
+		ctx.stroke();
+	}
+	
+	if ($F('segment_handles')) {
+		ctx.strokeStyle = '#0cf';
+		ctx.beginPath();
+		testPaths.each(function(paths) {
+			paths.each(function(path) {
+				path.segments.each(function(segment) {
+					switch (segment.order) {
+						case 2:
+						case 3:
+							ctx.moveTo(segment.points[0].x, segment.points[0].y);
+							for (var i = 1; i < segment.order; ++i) {
+								ctx.lineTo(segment.points[i].x, segment.points[i].y);
+							}
+							break;
+						case 4:
+							ctx.moveTo(segment.points[0].x, segment.points[0].y);
+							ctx.lineTo(segment.points[1].x, segment.points[1].y);
+							ctx.moveTo(segment.points[2].x, segment.points[2].y);
+							ctx.lineTo(segment.points[3].x, segment.points[3].y);
+							break;
+					}
+				});
+			});
+		});
+		ctx.stroke();
+		ctx.lineWidth = 4;
+		ctx.beginPath();
+		testPaths.each(function(paths) {
+			paths.each(function(path) {
+				path.segments.each(function(segment) {
+					segment.points.each(function(point) {
+						point.draw(ctx);
+					});
+				});
+			});
+		});
+		ctx.stroke();
+	}
+	
 	++firstDistance;
 	if (firstDistance > spacing) {
 		firstDistance -= spacing;
@@ -111,7 +178,6 @@ function init() {
 	if (canvas.getContext) {
 		ctx = canvas.getContext('2d');
 		
-		ctx.lineWidth = 4;
 		ctx.lineCap = 'round';
 		
 		testPaths[0] = newTestPaths();
@@ -141,7 +207,10 @@ function dump(obj) {
 
 <form>
 <input class="btn" id="start_stop_btn" type="button" value="" onclick="startStop()" />
-<input class="btn" id="step_btn" type="button" value="Step" onclick="drawFrame()" />
+<input class="btn" id="step_btn" type="button" value="Step" onclick="drawFrame()" /><br />
+<input id="path_bboxes" type="checkbox" value="1" onclick="drawFrame()" /> Path bounding boxes<br />
+<input id="segment_bboxes" type="checkbox" value="1" onclick="drawFrame()" /> Segment bounding boxes<br />
+<input id="segment_handles" type="checkbox" value="1" onclick="drawFrame()" /> Segment handles<br />
 </form>
 
 <div id="output"></div>
