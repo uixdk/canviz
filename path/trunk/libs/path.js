@@ -354,6 +354,13 @@ var Rect = Class.create(Path, {
 		this.b = b;
 		$super();
 	},
+	inset: function (ix, iy) {
+		this.l += ix;
+		this.t += iy;
+		this.r -= ix;
+		this.b -= iy;
+		return this;
+	},
 	getWidth: function() {
 		return this.r - this.l;
 	},
