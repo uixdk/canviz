@@ -11,7 +11,7 @@ header('Content-Type: text/html; charset=utf-8');
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 	<title>dashed and dotted lines</title>
 	<style type="text/css"><!--
-#start_stop_btn {
+.btn {
 	width: 8em;
 }
 --></style>
@@ -140,8 +140,8 @@ function dump(obj) {
 <canvas id="canvas" width="400" height="400"></canvas>
 
 <form>
-<input id="start_stop_btn" type="button" value="" onclick="startStop()" />
-<input id="start_stop_btn" type="button" value="Step" onclick="drawFrame()" />
+<input class="btn" id="start_stop_btn" type="button" value="" onclick="startStop()" />
+<input class="btn" id="step_btn" type="button" value="Step" onclick="drawFrame()" />
 </form>
 
 <div id="output"></div>
