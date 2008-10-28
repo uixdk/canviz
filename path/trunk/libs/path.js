@@ -40,6 +40,20 @@ var Bezier = Class.create({
 		});
 		this.reset();
 	},
+	getBB: function() {
+		if (!this.order) return undefined;
+		var l, t, r, b, p = this.points[0];
+		l = r = p.x;
+		t = b = p.y;
+		this.points.each(function(point) {
+			l = Math.min(l, point.x);
+			t = Math.min(t, point.y);
+			r = Math.max(r, point.x);
+			b = Math.max(b, point.y);
+		});
+		var rect = new Rect(l, t, r, b);
+		return (this.getBB = function() {return rect;})();
+	},
 	// Based on Oliver Steele's bezier.js library.
 	controlPolygonLength: function() {
 		var len = 0;
@@ -287,6 +301,22 @@ var Path = Class.create({
 		this.segments.each(function(segment) {
 			segment.offset(dx, dy);
 		});
+	},
+	getBB: function() {
+		if (0 == this.segments.length) this.setupSegments();
+		var l, t, r, b, p = this.segments[0].points[0];
+		l = r = p.x;
+		t = b = p.y;
+		this.segments.each(function(segment) {
+			segment.points.each(function(point) {
+				l = Math.min(l, point.x);
+				t = Math.min(t, point.y);
+				r = Math.max(r, point.x);
+				b = Math.max(b, point.y);
+			});
+		});
+		var rect = new Rect(l, t, r, b);
+		return (this.getBB = function() {return rect;})();
 	},
 	// Based on Oliver Steele's bezier.js library.
 	draw: function(ctx) {
