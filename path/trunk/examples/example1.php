@@ -66,6 +66,7 @@ function animateFrame() {
 }
 function drawFrame() {
 	ctx.clearRect(0, 0, 400, 400);
+	var output = '';
 	
 	ctx.strokeStyle = 'rgb(233,233,233)';
 	
@@ -86,7 +87,7 @@ function drawFrame() {
 	});
 	var after = new Date();
 	ctx.stroke();
-	if (!animating) $('output').innerHTML += 'dotted took ' + (after.getTime() - before.getTime())/1000 + ' seconds<br/>';
+	if (!animating) output += 'dotted took ' + (after.getTime() - before.getTime())/1000 + ' seconds<br/>';
 	
 	ctx.beginPath();
 	before = new Date();
@@ -95,13 +96,15 @@ function drawFrame() {
 	});
 	after = new Date();
 	ctx.stroke();
-	if (!animating) $('output').innerHTML += 'dashed took ' + (after.getTime() - before.getTime())/1000 + ' seconds<br/>';
+	if (!animating) output += 'dashed took ' + (after.getTime() - before.getTime())/1000 + ' seconds<br/>';
 	
 	++firstDistance;
 	if (firstDistance > spacing) {
 		firstDistance -= spacing;
 		drawFirst = !drawFirst;
 	}
+	
+	if (!animating) $('output').update(output);
 }
 function init() {
 	var canvas = $('canvas');
