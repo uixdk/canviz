@@ -361,6 +361,12 @@ var Rect = Class.create(Path, {
 		this.b -= iy;
 		return this;
 	},
+	expandToInclude: function(rect) {
+		this.l = Math.min(this.l, rect.l);
+		this.t = Math.min(this.t, rect.t);
+		this.r = Math.max(this.r, rect.r);
+		this.b = Math.max(this.b, rect.b);
+	},
 	getWidth: function() {
 		return this.r - this.l;
 	},
