@@ -170,7 +170,7 @@ function drawFrame() {
 	
 	if (!animating) $('output').update(output);
 }
-function init() {
+document.observe('dom:loaded', function() {
 	var canvas = $('canvas');
 	if (canvas.getContext) {
 		ctx = canvas.getContext('2d');
@@ -186,7 +186,7 @@ function init() {
 		$('start_stop_btn').value = animating ? 'Stop' : 'Animate';
 		drawFrame();
 	}
-}
+});
 function dump(obj) {
 	var output = '';
 	output += '<fieldset><legend>' + typeof(obj) + '<\/legend>';
@@ -198,7 +198,7 @@ function dump(obj) {
 }
 // --></script>
 </head>
-<body onload="init()">
+<body>
 
 <canvas id="canvas" width="400" height="400"></canvas>
 
