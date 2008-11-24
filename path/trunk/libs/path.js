@@ -54,6 +54,38 @@ var Bezier = Class.create({
 		var rect = new Rect(l, t, r, b);
 		return (this.getBB = function() {return rect;})();
 	},
+	isPointInBB: function(x, y, tolerance) {
+		if (Object.isUndefined(tolerance)) tolerance = 0;
+		var bb = this.getBB();
+		if (0 < tolerance) {
+			bb = Object.clone(bb);
+			bb.inset(-tolerance, -tolerance);
+		}
+		return !(x < bb.l || x > bb.r || y < bb.t || y > bb.b);
+	},
+	isPointOnBezier: function(x, y, tolerance) {
+		if (Object.isUndefined(tolerance)) tolerance = 0;
+		if (!this.isPointInBB(x, y, tolerance)) return false;
+		var segments = this.chordPoints();
+		var p1 = segments[0].p;
+		var p2, x1, y1, x2, y2, bb, twice_area, base, height;
+		for (var i = 1; i < segments.length; ++i) {
+			p2 = segments[i].p;
+			x1 = p1.x;
+			y1 = p1.y;
+			x2 = p2.x;
+			y2 = p2.y;
+			bb = new Rect(x1, y1, x2, y2);
+			if (bb.isPointInBB(x, y, tolerance)) {
+				twice_area = Math.abs(x1 * y2 + x2 * y + x * y1 - x2 * y1 - x * y2 - x1 * y);
+				base = p1.distanceFrom(p2);
+				height = twice_area / base;
+				if (height <= tolerance) return true;
+			}
+			p1 = p2;
+		}
+		return false;
+	},
 	// Based on Oliver Steele's bezier.js library.
 	controlPolygonLength: function() {
 		var len = 0;
@@ -317,6 +349,30 @@ var Path = Class.create({
 		});
 		var rect = new Rect(l, t, r, b);
 		return (this.getBB = function() {return rect;})();
+	},
+	isPointInBB: function(x, y, tolerance) {
+		if (Object.isUndefined(tolerance)) tolerance = 0;
+		var bb = this.getBB();
+		if (0 < tolerance) {
+			bb = Object.clone(bb);
+			bb.inset(-tolerance, -tolerance);
+		}
+		return !(x < bb.l || x > bb.r || y < bb.t || y > bb.b);
+	},
+	isPointOnPath: function(x, y, tolerance) {
+		if (Object.isUndefined(tolerance)) tolerance = 0;
+		if (!this.isPointInBB(x, y, tolerance)) return false;
+		var result = false;
+		this.segments.each(function(segment) {
+			if (segment.isPointOnBezier(x, y, tolerance)) {
+				result = true;
+				throw $break;
+			}
+		});
+		return result;
+	},
+	isPointInPath: function(x, y) {
+		return false;
 	},
 	// Based on Oliver Steele's bezier.js library.
 	draw: function(ctx) {
