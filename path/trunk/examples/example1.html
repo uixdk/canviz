@@ -104,12 +104,15 @@ function drawFrame() {
 	
 	ctx.lineWidth = 1;
 	
+	var bb;
+	
 	if ($F('path_bboxes')) {
 		ctx.strokeStyle = '#0c0';
 		ctx.beginPath();
 		testPaths.each(function(paths) {
 			paths.each(function(path) {
-				path.getBB().inset(-halfLineWidth, -halfLineWidth).draw(ctx);
+				bb = Object.clone(path.getBB());
+				bb.inset(-halfLineWidth, -halfLineWidth).draw(ctx);
 			});
 		});
 		ctx.stroke();
@@ -121,7 +124,8 @@ function drawFrame() {
 		testPaths.each(function(paths) {
 			paths.each(function(path) {
 				path.segments.each(function(segment) {
-					segment.getBB().inset(-halfLineWidth, -halfLineWidth).drawDashed(ctx, 8);
+					bb = Object.clone(segment.getBB());
+					bb.inset(-halfLineWidth, -halfLineWidth).drawDashed(ctx, 8);
 				});
 			});
 		});
