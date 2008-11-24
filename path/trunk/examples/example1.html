@@ -44,7 +44,7 @@ function newTestPaths() {
 		new Rect(40, 124, 170, 170)
 	];
 }
-var testPaths = [], spacing = 30, firstDistance = spacing, drawFirst = true, ctx, animating = false;
+var testPaths = [], spacing = 30, firstDistance = spacing, drawFirst = true, ctx, animating = false, pointerX = pointerY = 0, canvasOffset;
 function startStop() {
 	if (animating) {
 		$('start_stop_btn').value = 'Animate';
@@ -100,6 +100,18 @@ function drawFrame() {
 	after = new Date();
 	ctx.stroke();
 	if (!animating) output += 'dashed took ' + (after.getTime() - before.getTime())/1000 + ' seconds<br/>';
+	
+	ctx.strokeStyle = 'rgba(255,0,0,0.5)';
+	
+	ctx.beginPath();
+	testPaths.each(function(paths) {
+		paths.each(function(path) {
+			if (path.isPointOnPath(pointerX, pointerY, 5)) {
+				path.draw(ctx);
+			}
+		});
+	});
+	ctx.stroke();
 	
 	ctx.lineWidth = 1;
 	
@@ -172,6 +184,13 @@ function drawFrame() {
 	
 	if (!animating) $('output').update(output);
 }
+function handleEvent(event) {
+	if (event) {
+		pointerX = event.pointerX() - canvasOffset.left;
+		pointerY = event.pointerY() - canvasOffset.top;
+		drawFrame();
+	}
+}
 document.observe('dom:loaded', function() {
 	var canvas = $('canvas');
 	if (canvas.getContext) {
@@ -184,6 +203,10 @@ document.observe('dom:loaded', function() {
 		testPaths[1].each(function(path) {
 			path.offset(0, 190);
 		});
+		
+		canvasOffset = canvas.cumulativeOffset();
+		canvas.observe('mousemove', handleEvent);
+		canvas.observe('mouseout', handleEvent);
 		
 		$('start_stop_btn').value = animating ? 'Stop' : 'Animate';
 		drawFrame();
