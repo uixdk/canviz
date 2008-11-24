@@ -57,6 +57,11 @@ function startStop() {
 }
 function animateFrame() {
 	if (!animating) return;
+	++firstDistance;
+	if (firstDistance > spacing) {
+		firstDistance -= spacing;
+		drawFirst = !drawFirst;
+	}
 	drawFrame();
 	if (animating) setTimeout('animateFrame()', 50);
 }
@@ -160,12 +165,6 @@ function drawFrame() {
 			});
 		});
 		ctx.stroke();
-	}
-	
-	++firstDistance;
-	if (firstDistance > spacing) {
-		firstDistance -= spacing;
-		drawFirst = !drawFirst;
 	}
 	
 	if (!animating) $('output').update(output);
