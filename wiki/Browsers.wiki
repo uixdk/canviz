@@ -13,6 +13,7 @@ These browsers are supported:
  * [http://www.apple.com/safari/ Safari] 3.0+ (Safari 2.x has the canvas element but does not support the scale or translate functions which Canviz uses. Safari 3 is a free upgrade from Safari 2.x. Safari 1.x does not have the canvas element and there is no free upgrade.)
  * [http://www.getfirefox.com/ Firefox] 1.5+ (earlier versions don't have the canvas element)
  * [http://www.opera.com/ Opera] 9.0+ (earlier versions don't have the canvas element)
+ * [http://www.google.com/chrome Chrome] 1.0+
 
 Other browsers based on current versions of the [http://en.wikipedia.org/wiki/WebKit WebKit] or [http://en.wikipedia.org/wiki/Gecko_(layout_engine) Gecko] layout engines should be compatible as well.
 
