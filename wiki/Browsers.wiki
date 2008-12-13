@@ -14,6 +14,7 @@ These browsers are supported:
  * [http://www.getfirefox.com/ Firefox] 1.5+ (earlier versions don't have the canvas element)
  * [http://www.opera.com/ Opera] 9.0+ (earlier versions don't have the canvas element)
  * [http://www.google.com/chrome Chrome] 1.0+
+ * [http://www.caminobrowser.org/ Camino] 1.0b2+
 
 Other browsers based on current versions of the [http://en.wikipedia.org/wiki/WebKit WebKit] or [http://en.wikipedia.org/wiki/Gecko_(layout_engine) Gecko] layout engines should be compatible as well.
 
