@@ -12,6 +12,7 @@ These browsers are supported:
 
  * [http://www.apple.com/safari/ Safari] 3.0+ (Safari 2.x has the canvas element but does not support the scale or translate functions which Canviz uses. Safari 3 is a free upgrade from Safari 2.x. Safari 1.x does not have the canvas element and there is no free upgrade.)
  * [http://www.getfirefox.com/ Firefox] 1.5+ (earlier versions don't have the canvas element)
+ * [http://www.omnigroup.com/omniweb/ OmniWeb] 5.6+ (!OmniWeb 5.5.x has the canvas element but doesn't like it when the canvas resizes. !OmniWeb before 5.5 does not have the canvas element.)
  * [http://www.opera.com/ Opera] 9.25+ (earlier versions are not supported by Prototype)
  * [http://www.google.com/chrome Chrome] 1.0+
  * [http://www.caminobrowser.org/ Camino] 1.0b2+ (earlier versions don't have the canvas element)
