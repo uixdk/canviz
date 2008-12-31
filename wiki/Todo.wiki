@@ -1,0 +1,18 @@
+#summary To-do list
+
+= Introduction =
+
+Canviz isn't quite at version 1.0 yet, but it's close. Here's what I still want to do before releasing Canviz 1.0.
+
+
+= Details =
+
+== Internet Explorer for Windows ==
+
+ * <strike>Support IE 6 and 7 (issue #8)</strike>
+ * Use Silverlight version of excanvas if possible (issue #43) to fix some issues with the VML version (like issue #41)
+
+== Clickable nodes and edges ==
+
+ * <strike>Support clicking the label of a node or edge (issue #11)</strike>
+ * Support clicking the shape of a node or edge (issue #11)
