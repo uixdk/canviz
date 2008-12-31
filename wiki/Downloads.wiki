@@ -2,4 +2,4 @@
 
 = Downloads =
 
-Packaged downloads are not yet available because I don't consider Canviz to be at the 1.0 stage yet. Until then, please [http://code.google.com/p/canviz/source/checkout check out the source code from the repository].
+Packaged downloads are not yet available because I don't consider Canviz to be at the 1.0 stage yet. [Todo Here's what I have left to do.] Until then, please [http://code.google.com/p/canviz/source/checkout check out the source code from the repository].
