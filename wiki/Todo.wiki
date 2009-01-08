@@ -1,18 +1,5 @@
 #summary To-do list
 
-= Introduction =
+= To-do =
 
-Canviz isn't quite at version 1.0 yet, but it's close. Here's what I still want to do before releasing Canviz 1.0.
-
-
-= Details =
-
-== Internet Explorer for Windows ==
-
- * <strike>Support IE 6 and 7 (issue #8)</strike>
- * Use Silverlight version of excanvas if possible (issue #43) to fix some issues with the VML version (like issue #41)
-
-== Clickable nodes and edges ==
-
- * <strike>Support clicking the label of a node or edge (issue #11)</strike>
- * Support clicking the shape of a node or edge (issue #11)
+I don't want to release Canviz 1.0 until it has feature parity with what you can get by using a PNG with an image map. I still want to resolve [http://code.google.com/p/canviz/issues/list?can=2&q=label%3AMilestone-Release1.0 these issues] before releasing 1.0.
