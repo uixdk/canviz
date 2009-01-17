@@ -13,9 +13,8 @@ Canviz is still new, so not many questions have been asked yet. If you have a qu
 
 Q. When [http://code.google.com/p/canviz/source/checkout checking out the source code from the repository], I see an error message like this:
 
-{{{
-svn: Error parsing svn:externals property on 'canviz-read-only': '-r 195 ^/path/trunk/libs path'
-}}}
+<pre>
+svn: Error parsing svn:externals property on 'canviz-read-only': '-r 195 ^/path/trunk/libs path'</pre>
 
 The path, prototype and excanvas directories are missing from the checkout, so Canviz doesn't work.
 
