@@ -419,7 +419,7 @@ var Polygon = Class.create(Path, {
 	}
 });
 
-var Rect = Class.create(Path, {
+var Rect = Class.create(Polygon, {
 	initialize: function($super, l, t, r, b) {
 		this.l = l;
 		this.t = t;
@@ -446,25 +446,16 @@ var Rect = Class.create(Path, {
 	getHeight: function() {
 		return this.b - this.t;
 	},
-	setupSegments: function() {
+	setupSegments: function($super) {
 		var w = this.getWidth();
 		var h = this.getHeight();
-		this.addBezier([
+		this.points = [
 			new Point(this.l, this.t),
-			new Point(this.l + w, this.t)
-		]);
-		this.addBezier([
 			new Point(this.l + w, this.t),
-			new Point(this.l + w, this.t + h)
-		]);
-		this.addBezier([
 			new Point(this.l + w, this.t + h),
 			new Point(this.l, this.t + h)
-		]);
-		this.addBezier([
-			new Point(this.l, this.t + h),
-			new Point(this.l, this.t)
-		]);
+		];
+		$super();
 	}
 });
 
