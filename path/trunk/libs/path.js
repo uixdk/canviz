@@ -409,6 +409,12 @@ var Polygon = Class.create(Path, {
 		this.points = points || [];
 		$super();
 	},
+	offset: function(dx, dy) {
+		this.points.each(function(point) {
+			point.offset(dx, dy);
+		});
+		return this;
+	},
 	setupSegments: function() {
 		this.points.each(function(p, i) {
 			var next = i + 1;
@@ -428,6 +434,13 @@ var Rect = Class.create(Polygon, {
 		this.r = r;
 		this.b = b;
 		$super();
+	},
+	offset: function(dx, dy) {
+		this.l += dx;
+		this.t += dy;
+		this.r += dx;
+		this.b += dy;
+		return this;
 	},
 	inset: function (ix, iy) {
 		this.l += ix;
@@ -469,6 +482,11 @@ var Ellipse = Class.create(Path, {
 		this.rx = rx; // radius x
 		this.ry = ry; // radius y
 		$super();
+	},
+	offset: function(dx, dy) {
+		this.cx += dx;
+		this.cy += dy;
+		return this;
 	},
 	setupSegments: function() {
 		this.addBezier([
