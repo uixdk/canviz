@@ -14,7 +14,7 @@ var Point = Class.create({
 		var dy = this.y - point.y;
 		return Math.sqrt(dx * dx + dy * dy);
 	},
-	draw: function(ctx) {
+	makePath: function(ctx) {
 		ctx.moveTo(this.x, this.y);
 		ctx.lineTo(this.x + 0.001, this.y);
 	}
@@ -264,10 +264,10 @@ var Bezier = Class.create({
 	},
 	// Render the Bezier to a WHATWG 2D canvas context.
 	// Based on Oliver Steele's bezier.js library.
-	draw: function (ctx, moveTo) {
+	makePath: function (ctx, moveTo) {
 		if ('undefined' == typeof moveTo) moveTo = true;
 		if (moveTo) ctx.moveTo(this.points[0].x, this.points[0].y);
-		var fn = this.drawCommands[this.order];
+		var fn = this.pathCommands[this.order];
 		if (fn) {
 			var coords = [];
 			for (var i = 1 == this.order ? 0 : 1; i < this.points.length; ++i) {
@@ -280,7 +280,7 @@ var Bezier = Class.create({
 	// Wrapper functions to work around Safari, in which, up to at least 2.0.3,
 	// fn.apply isn't defined on the context primitives.
 	// Based on Oliver Steele's bezier.js library.
-	drawCommands: [
+	pathCommands: [
 		null,
 		// This will have an effect if there's a line thickness or end cap.
 		function(x, y) {
@@ -296,7 +296,7 @@ var Bezier = Class.create({
 			this.bezierCurveTo(x1, y1, x2, y2, x3, y3);
 		}
 	],
-	drawDashed: function(ctx, dashLength, firstDistance, drawFirst) {
+	makeDashedPath: function(ctx, dashLength, firstDistance, drawFirst) {
 		if (!firstDistance) firstDistance = dashLength;
 		if ('undefined' == typeof drawFirst) drawFirst = true;
 		var markedEvery = this.markedEvery(dashLength, firstDistance);
@@ -304,16 +304,16 @@ var Bezier = Class.create({
 		var drawLast = (markedEvery.times.length % 2);
 		if (drawLast) markedEvery.times.push(1);
 		for (var i = 1; i < markedEvery.times.length; i += 2) {
-			this.mid(markedEvery.times[i - 1], markedEvery.times[i]).draw(ctx);
+			this.mid(markedEvery.times[i - 1], markedEvery.times[i]).makePath(ctx);
 		}
 		return {firstDistance: markedEvery.nextDistance, drawFirst: drawLast};
 	},
-	drawDotted: function(ctx, dotSpacing, firstDistance) {
+	makeDottedPath: function(ctx, dotSpacing, firstDistance) {
 		if (!firstDistance) firstDistance = dotSpacing;
 		var markedEvery = this.markedEvery(dotSpacing, firstDistance);
 		if (dotSpacing == firstDistance) markedEvery.times.unshift(0);
 		markedEvery.times.each(function(t) {
-			this.pointAtT(t).draw(ctx);
+			this.pointAtT(t).makePath(ctx);
 		}.bind(this));
 		return markedEvery.nextDistance;
 	}
@@ -375,29 +375,29 @@ var Path = Class.create({
 		return false;
 	},
 	// Based on Oliver Steele's bezier.js library.
-	draw: function(ctx) {
+	makePath: function(ctx) {
 		if (0 == this.segments.length) this.setupSegments();
 		var moveTo = true;
 		this.segments.each(function(segment) {
-			segment.draw(ctx, moveTo);
+			segment.makePath(ctx, moveTo);
 			moveTo = false;
 		});
 	},
-	drawDashed: function(ctx, dashLength, firstDistance, drawFirst) {
+	makeDashedPath: function(ctx, dashLength, firstDistance, drawFirst) {
 		if (0 == this.segments.length) this.setupSegments();
 		var info = {
 			drawFirst: ('undefined' == typeof drawFirst) ? true : drawFirst,
 			firstDistance: firstDistance || dashLength
 		};
 		this.segments.each(function(segment) {
-			info = segment.drawDashed(ctx, dashLength, info.firstDistance, info.drawFirst);
+			info = segment.makeDashedPath(ctx, dashLength, info.firstDistance, info.drawFirst);
 		});
 	},
-	drawDotted: function(ctx, dotSpacing, firstDistance) {
+	makeDottedPath: function(ctx, dotSpacing, firstDistance) {
 		if (0 == this.segments.length) this.setupSegments();
 		if (!firstDistance) firstDistance = dotSpacing;
 		this.segments.each(function(segment) {
-			firstDistance = segment.drawDotted(ctx, dotSpacing, firstDistance);
+			firstDistance = segment.makeDottedPath(ctx, dotSpacing, firstDistance);
 		});
 	}
 });

@@ -76,7 +76,7 @@ function drawFrame() {
 	ctx.beginPath();
 	testPaths.each(function(paths) {
 		paths.each(function(path) {
-			path.draw(ctx);
+			path.makePath(ctx);
 		});
 	});
 	ctx.stroke();
@@ -86,7 +86,7 @@ function drawFrame() {
 	ctx.beginPath();
 	var before = new Date();
 	testPaths[0].each(function(path) {
-		path.drawDotted(ctx, spacing, firstDistance);
+		path.makeDottedPath(ctx, spacing, firstDistance);
 	});
 	var after = new Date();
 	ctx.stroke();
@@ -95,7 +95,7 @@ function drawFrame() {
 	ctx.beginPath();
 	before = new Date();
 	testPaths[1].each(function(path) {
-		path.drawDashed(ctx, spacing, firstDistance, drawFirst);
+		path.makeDashedPath(ctx, spacing, firstDistance, drawFirst);
 	});
 	after = new Date();
 	ctx.stroke();
@@ -107,7 +107,7 @@ function drawFrame() {
 	testPaths.each(function(paths) {
 		paths.each(function(path) {
 			if (path.isPointOnPath(pointerX, pointerY, 5)) {
-				path.draw(ctx);
+				path.makePath(ctx);
 			}
 		});
 	});
@@ -123,7 +123,7 @@ function drawFrame() {
 		testPaths.each(function(paths) {
 			paths.each(function(path) {
 				bb = Object.clone(path.getBB());
-				bb.inset(-halfLineWidth, -halfLineWidth).draw(ctx);
+				bb.inset(-halfLineWidth, -halfLineWidth).makePath(ctx);
 			});
 		});
 		ctx.stroke();
@@ -136,7 +136,7 @@ function drawFrame() {
 			paths.each(function(path) {
 				path.segments.each(function(segment) {
 					bb = Object.clone(segment.getBB());
-					bb.inset(-halfLineWidth, -halfLineWidth).drawDashed(ctx, 8);
+					bb.inset(-halfLineWidth, -halfLineWidth).makeDashedPath(ctx, 8);
 				});
 			});
 		});
@@ -174,7 +174,7 @@ function drawFrame() {
 			paths.each(function(path) {
 				path.segments.each(function(segment) {
 					segment.points.each(function(point) {
-						point.draw(ctx);
+						point.makePath(ctx);
 					});
 				});
 			});
