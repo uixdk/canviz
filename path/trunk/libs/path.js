@@ -8,6 +8,7 @@ var Point = Class.create({
 	offset: function(dx, dy) {
 		this.x += dx;
 		this.y += dy;
+		return this;
 	},
 	distanceFrom: function(point) {
 		var dx = this.x - point.x;
@@ -39,6 +40,7 @@ var Bezier = Class.create({
 			point.offset(dx, dy);
 		});
 		this.reset();
+		return this;
 	},
 	getBB: function() {
 		if (!this.order) return undefined;
