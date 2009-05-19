@@ -135,7 +135,7 @@ var Bezier = Class.create({
 	// Returns two beziers resulting from splitting this bezier at t=0.5.
 	// Based on Oliver Steele's bezier.js library.
 	split: function(t) {
-		if ('undefined' == typeof t) t = 0.5;
+		if (Object.isUndefined(t)) t = 0.5;
 		var m = (0.5 == t) ? this.triangle() : this.triangleAtT(t);
 		var leftPoints  = new Array(this.order);
 		var rightPoints = new Array(this.order);
@@ -265,7 +265,7 @@ var Bezier = Class.create({
 	// Render the Bezier to a WHATWG 2D canvas context.
 	// Based on Oliver Steele's bezier.js library.
 	makePath: function (ctx, moveTo) {
-		if ('undefined' == typeof moveTo) moveTo = true;
+		if (Object.isUndefined(moveTo)) moveTo = true;
 		if (moveTo) ctx.moveTo(this.points[0].x, this.points[0].y);
 		var fn = this.pathCommands[this.order];
 		if (fn) {
@@ -298,7 +298,7 @@ var Bezier = Class.create({
 	],
 	makeDashedPath: function(ctx, dashLength, firstDistance, drawFirst) {
 		if (!firstDistance) firstDistance = dashLength;
-		if ('undefined' == typeof drawFirst) drawFirst = true;
+		if (Object.isUndefined(drawFirst)) drawFirst = true;
 		var markedEvery = this.markedEvery(dashLength, firstDistance);
 		if (drawFirst) markedEvery.times.unshift(0);
 		var drawLast = (markedEvery.times.length % 2);
@@ -386,7 +386,7 @@ var Path = Class.create({
 	makeDashedPath: function(ctx, dashLength, firstDistance, drawFirst) {
 		if (0 == this.segments.length) this.setupSegments();
 		var info = {
-			drawFirst: ('undefined' == typeof drawFirst) ? true : drawFirst,
+			drawFirst: Object.isUndefined(drawFirst) ? true : drawFirst,
 			firstDistance: firstDistance || dashLength
 		};
 		this.segments.each(function(segment) {
