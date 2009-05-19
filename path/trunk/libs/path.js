@@ -402,6 +402,23 @@ var Path = Class.create({
 	}
 });
 
+var Polygon = Class.create(Path, {
+	initialize: function($super, points) {
+		this.points = points || [];
+		$super();
+	},
+	setupSegments: function() {
+		this.points.each(function(p, i) {
+			var next = i + 1;
+			if (this.points.length == next) next = 0;
+			this.addBezier([
+				p,
+				this.points[next]
+			]);
+		}.bind(this));
+	}
+});
+
 var Rect = Class.create(Path, {
 	initialize: function($super, l, t, r, b) {
 		this.l = l;
