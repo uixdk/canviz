@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- $Id$ -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta name="MSSmartTagsPreventParsing" content="true" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<title>transformations</title>
+	<style type="text/css"><!--
+body {
+	background: #f7f7f7;
+	color: #000;
+	margin: 0;
+	padding: 0;
+	text-align: center;
+}
+canvas {
+	margin: 50px;
+}
+ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+--></style>
+	<!--[if IE]><script type="text/javascript" src="excanvas/excanvas.js"></script><![endif]-->
+	<script type="text/javascript" src="prototype/prototype.js"></script>
+	<script type="text/javascript" src="../libs/path.js"></script>
+	<script type="text/javascript"><!--
+var ctx, shapes;
+document.observe('dom:loaded', function() {
+	var canvas = $('canvas');
+	if (canvas.getContext) {
+		ctx = canvas.getContext('2d');
+		ctx.lineWidth = 4;
+		ctx.lineCap = 'round';
+		
+		shapes = [
+			new Rect(-125, -125, 125, 125, {
+				strokeStyle: 'rgba(0, 0, 0, 0.1)'
+			}),
+			new Rect(-125, -125, 125, 125, {
+				strokeStyle: 'rgba(0, 0, 0, 0.9)'
+			})
+		];
+		
+		var fps = 30;
+		var delay = 1000 / fps;
+		drawFrame();
+		setInterval('drawFrame()', delay);
+	}
+});
+
+function drawFrame() {
+	var now = new Date();
+	var degrees = now.getTime() / 30 % 360;
+	var radians = degrees / 180 * Math.PI;
+	ctx.clearRect(0, 0, 400, 400);
+	ctx.save();
+	ctx.translate(200, 200);
+	shapes[0].draw(ctx);
+	if ($F('translate_checkbox')) {
+		var dx = 10 * Math.sin(radians * 4);
+		var dy = 10 * Math.cos(radians * 4);
+		ctx.translate(dx, dy);
+	}
+	if ($F('scale_checkbox')) {
+		var scale = 1 + 0.05 * Math.cos(radians * 8);
+		ctx.scale(scale, scale);
+	}
+	if ($F('rotate_checkbox')) {
+		ctx.rotate(radians);
+	}
+	shapes[1].draw(ctx);
+	ctx.restore();
+}
+// --></script>
+</head>
+<body>
+
+<canvas id="canvas" width="400" height="400"></canvas>
+
+<form>
+<ul>
+<li><input id="rotate_checkbox" type="checkbox" value="1" checked="checked" />
+<label for="rotate_checkbox">Rotate</label></li>
+<li><input id="scale_checkbox" type="checkbox" value="1" />
+<label for="scale_checkbox">Scale</label></li>
+<li><input id="translate_checkbox" type="checkbox" value="1" />
+<label for="translate_checkbox">Translate</label></li>
+</ul>
+</form>
+
+<div id="out"></div>
+
+</body>
+</html>
