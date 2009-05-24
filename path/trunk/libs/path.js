@@ -322,8 +322,25 @@ var Bezier = Class.create({
 });
 
 var Path = Class.create({
-	initialize: function(segments) {
+	initialize: function(segments, options) {
 		this.segments = segments || [];
+		this.options = {};
+		this.setOptions(Object.extend({
+			x_fill: false,
+			x_stroke: true,
+			x_strokeType: 'solid',
+			x_dashLength: 6,
+			x_dotSpacing: 4
+		}, options || {}));
+	},
+	setOptions: function(options) {
+		$H(options).each(function(option) {
+			if (option.key.startsWith('x_')) {
+				this[option.key] = option.value;
+			} else {
+				this.options[option.key] = option.value;
+			}
+		}.bind(this));
 	},
 	setupSegments: function() {},
 	// Based on Oliver Steele's bezier.js library.
@@ -401,13 +418,45 @@ var Path = Class.create({
 		this.segments.each(function(segment) {
 			firstDistance = segment.makeDottedPath(ctx, dotSpacing, firstDistance);
 		});
+	},
+	draw: function(ctx) {
+		ctx.save();
+		$H(this.options).each(function(option) {
+			ctx[option.key] = option.value;
+		});
+		if (this.x_fill) {
+			ctx.beginPath();
+			this.makePath(ctx);
+			ctx.fill();
+		}
+		if (this.x_stroke) {
+			switch (this.x_strokeType) {
+				case 'dashed':
+					ctx.beginPath();
+					this.makeDashedPath(ctx, this.x_dashLength);
+					break;
+				case 'dotted':
+					if (ctx.lineWidth < 2) ctx.lineWidth = 2;
+					ctx.beginPath();
+					this.makeDottedPath(ctx, this.x_dotSpacing);
+					break;
+				case 'solid':
+				default:
+					if (!this.x_fill) {
+						ctx.beginPath();
+						this.makePath(ctx);
+					}
+			}
+			ctx.stroke();
+		}
+		ctx.restore();
 	}
 });
 
 var Polygon = Class.create(Path, {
-	initialize: function($super, points) {
+	initialize: function($super, points, options) {
 		this.points = points || [];
-		$super();
+		$super([], options);
 	},
 	offset: function(dx, dy) {
 		this.points.each(function(point) {
@@ -428,12 +477,12 @@ var Polygon = Class.create(Path, {
 });
 
 var Rect = Class.create(Polygon, {
-	initialize: function($super, l, t, r, b) {
+	initialize: function($super, l, t, r, b, options) {
 		this.l = l;
 		this.t = t;
 		this.r = r;
 		this.b = b;
-		$super();
+		$super([], options);
 	},
 	offset: function(dx, dy) {
 		this.l += dx;
@@ -476,12 +525,12 @@ var Rect = Class.create(Polygon, {
 
 var Ellipse = Class.create(Path, {
 	KAPPA: 0.5522847498,
-	initialize: function($super, cx, cy, rx, ry) {
+	initialize: function($super, cx, cy, rx, ry, options) {
 		this.cx = cx; // center x
 		this.cy = cy; // center y
 		this.rx = rx; // radius x
 		this.ry = ry; // radius y
-		$super();
+		$super([], options);
 	},
 	offset: function(dx, dy) {
 		this.cx += dx;
