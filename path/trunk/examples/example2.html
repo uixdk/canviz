@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- $Id$ -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta name="MSSmartTagsPreventParsing" content="true" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<title>shapes</title>
+	<style type="text/css"><!--
+body {
+	background: #f7f7f7;
+	color: #000;
+	margin: 0;
+	padding: 0;
+	text-align: center;
+}
+canvas {
+	margin: 50px;
+}
+--></style>
+	<!--[if IE]><script type="text/javascript" src="excanvas/excanvas.js"></script><![endif]-->
+	<script type="text/javascript" src="prototype/prototype.js"></script>
+	<script type="text/javascript" src="../libs/path.js"></script>
+	<script type="text/javascript"><!--
+var ctx, shapes;
+document.observe('dom:loaded', function() {
+	var canvas = $('canvas');
+	if (canvas.getContext) {
+		ctx = canvas.getContext('2d');
+		ctx.lineCap = 'round';
+		ctx.lineWidth = 4;
+		
+		shapes = [
+			new Rect(-100, -100, 100, 100),
+			new Ellipse(0, 0, 100, 100, {
+				x_fill: true,
+				fillStyle: 'rgba(0, 255, 0, 0.4)',
+				x_stroke: false
+			}),
+			new Polygon([
+				new Point(-100, 100),
+				new Point(0, 100 - 100 * Math.sqrt(3)),
+				new Point(100, 100)
+			], {
+				x_fill: true,
+				fillStyle: 'rgba(0, 0, 255, 0.4)',
+				strokeStyle: 'rgba(0, 0, 255, 0.8)'
+			})
+		];
+		shapes[0].setOptions({
+			strokeStyle: 'rgba(255, 0, 0, 0.8)'
+		});
+		
+		drawFrame();
+	}
+});
+
+function drawFrame() {
+	ctx.clearRect(0, 0, 800, 400);
+	ctx.save();
+	ctx.translate(150, 150);
+	shapes.each(function(shape) {
+		shape.draw(ctx);
+		ctx.translate(250, 0);
+	});
+	ctx.restore();
+}
+// --></script>
+</head>
+<body>
+
+<canvas id="canvas" width="800" height="400"></canvas>
+
+</body>
+</html>
