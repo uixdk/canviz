@@ -27,7 +27,6 @@ document.observe('dom:loaded', function() {
 	var canvas = $('canvas');
 	if (canvas.getContext) {
 		ctx = canvas.getContext('2d');
-		ctx.lineCap = 'round';
 		ctx.lineWidth = 4;
 		
 		shapes = [
@@ -44,11 +43,14 @@ document.observe('dom:loaded', function() {
 			], {
 				x_fill: true,
 				fillStyle: 'rgba(0, 0, 255, 0.4)',
-				strokeStyle: 'rgba(0, 0, 255, 0.8)'
+				strokeStyle: 'rgba(0, 0, 255, 0.8)',
+				lineCap: 'round'
 			})
 		];
 		shapes[0].setOptions({
-			strokeStyle: 'rgba(255, 0, 0, 0.8)'
+			strokeStyle: 'rgba(255, 0, 0, 0.8)',
+			x_strokeType: 'dashed',
+			x_dashLength: 20
 		});
 		
 		drawFrame();
