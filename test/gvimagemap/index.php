@@ -68,9 +68,9 @@ switch ($output_format) {
 <div id="container">
 <img id="image" src="<?php echo htmlspecialchars($_SERVER['SCRIPT_NAME'] . '/' . $graph_base . '.png'); ?>" />
 <canvas id="canvas"></canvas>
+<div id="status"></div>
 <img id="overlay" src="<?php echo $base_href; ?>spacer.gif" usemap="#<?php echo $map_name; ?>" />
 <?php echo $cmapx; ?>
-<div id="status"></div>
 </div>
 
 </body>
