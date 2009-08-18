@@ -1,0 +1,10 @@
+<?php
+
+/*
+ * $Id$
+ */
+
+$graphviz_prefix = '/usr/local';
+$graph_dir = $graphviz_prefix . '/share/graphviz/graphs/directed';
+$dot = $graphviz_prefix . '/bin/dot';
+$default_graph = 'crazy.gv';

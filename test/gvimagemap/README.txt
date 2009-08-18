@@ -1,0 +1,1 @@
+This page shows how the cmapx output from Graphviz looks, and lets you test the browser's ability to deal with large client-side image maps. Clicking on a node or edge highlights the corresponding image map area.

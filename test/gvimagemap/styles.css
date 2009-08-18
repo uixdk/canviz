@@ -1,0 +1,40 @@
+/*
+ * $Id$
+ */
+
+img {
+	border: 0;
+}
+#container {
+	position: relative;
+}
+#image,
+#canvas,
+#overlay {
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+#status {
+/*
+	display: none;
+*/
+	position: absolute;
+	right: 0;
+	top: 0;
+	text-align: right;
+	width: 24em;
+	height: 6em;
+	padding: 0.5em;
+	background: rgba(0, 0, 0, 0.1);
+	z-index: 4;
+}
+#image {
+	z-index: 1;
+}
+#canvas {
+	z-index: 2;
+}
+#overlay {
+	z-index: 3;
+}
