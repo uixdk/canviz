@@ -24,7 +24,7 @@ http://osteele.com/archives/2006/02/javascript-beziers .
 
 Dashed and dotted line drawing was implemented based on the algorithm described
 by Jeremy Gibbons in his paper Dotted and Dashed Lines in Metafont. See
-http://www.comlab.ox.ac.uk/jeremy.gibbons/publications/#dashed .
+http://www.cs.ox.ac.uk/jeremy.gibbons/publications/#dashed .
 
 Path requires the use of the Prototype and Excanvas libraries, which have
 licenses of their own.
