@@ -1,10 +1,11 @@
 // $Id$
 
-var Point = Class.create({
-	initialize: function(x, y) {
+function Point(x, y) {
 		this.x = x;
 		this.y = y;
-	},
+};
+Point.prototype = {
+	constructor: Point,
 	offset: function(dx, dy) {
 		this.x += dx;
 		this.y += dy;
@@ -19,13 +20,14 @@ var Point = Class.create({
 		ctx.moveTo(this.x, this.y);
 		ctx.lineTo(this.x + 0.001, this.y);
 	}
-});
+};
 
-var Bezier = Class.create({
-	initialize: function(points) {
+function Bezier(points) {
 		this.points = points;
 		this.order = points.length;
-	},
+};
+Bezier.prototype = {
+	constructor: Bezier,
 	reset: function() {
 		with (Bezier.prototype) {
 			this.controlPolygonLength = controlPolygonLength;
@@ -319,10 +321,9 @@ var Bezier = Class.create({
 		}.bind(this));
 		return markedEvery.nextDistance;
 	}
-});
+};
 
-var Path = Class.create({
-	initialize: function(segments, options) {
+function Path(segments, options) {
 		this.segments = segments || [];
 		this.options = {};
 		this.setOptions(Object.extend({
@@ -332,7 +333,9 @@ var Path = Class.create({
 			x_dashLength: 6,
 			x_dotSpacing: 4
 		}, options || {}));
-	},
+};
+Path.prototype = {
+	constructor: Path,
 	setOptions: function(options) {
 		$H(options).each(function(option) {
 			if (option.key.startsWith('x_')) {
@@ -451,20 +454,21 @@ var Path = Class.create({
 		}
 		ctx.restore();
 	}
-});
+};
 
-var Polygon = Class.create(Path, {
-	initialize: function($super, points, options) {
+function Polygon(points, options) {
 		this.points = points || [];
-		$super([], options);
-	},
-	offset: function(dx, dy) {
+		Path.call(this, [], options);
+};
+Polygon.prototype = new Path();
+Polygon.prototype.constructor = Polygon;
+Polygon.prototype.offset = function(dx, dy) {
 		this.points.each(function(point) {
 			point.offset(dx, dy);
 		});
 		return this;
-	},
-	setupSegments: function() {
+};
+Polygon.prototype.setupSegments = function() {
 		this.points.each(function(p, i) {
 			var next = i + 1;
 			if (this.points.length == next) next = 0;
@@ -473,44 +477,44 @@ var Polygon = Class.create(Path, {
 				this.points[next]
 			]);
 		}.bind(this));
-	}
-});
+};
 
-var Rect = Class.create(Polygon, {
-	initialize: function($super, l, t, r, b, options) {
+function Rect(l, t, r, b, options) {
 		this.l = l;
 		this.t = t;
 		this.r = r;
 		this.b = b;
-		$super([], options);
-	},
-	offset: function(dx, dy) {
+		Polygon.call(this, [], options);
+};
+Rect.prototype = new Polygon();
+Rect.prototype.constructor = Rect;
+Rect.prototype.offset = function(dx, dy) {
 		this.l += dx;
 		this.t += dy;
 		this.r += dx;
 		this.b += dy;
 		return this;
-	},
-	inset: function (ix, iy) {
+};
+Rect.prototype.inset = function(ix, iy) {
 		this.l += ix;
 		this.t += iy;
 		this.r -= ix;
 		this.b -= iy;
 		return this;
-	},
-	expandToInclude: function(rect) {
+};
+Rect.prototype.expandToInclude = function(rect) {
 		this.l = Math.min(this.l, rect.l);
 		this.t = Math.min(this.t, rect.t);
 		this.r = Math.max(this.r, rect.r);
 		this.b = Math.max(this.b, rect.b);
-	},
-	getWidth: function() {
+};
+Rect.prototype.getWidth = function() {
 		return this.r - this.l;
-	},
-	getHeight: function() {
+};
+Rect.prototype.getHeight = function() {
 		return this.b - this.t;
-	},
-	setupSegments: function($super) {
+};
+Rect.prototype.setupSegments = function() {
 		var w = this.getWidth();
 		var h = this.getHeight();
 		this.points = [
@@ -519,48 +523,47 @@ var Rect = Class.create(Polygon, {
 			new Point(this.l + w, this.t + h),
 			new Point(this.l, this.t + h)
 		];
-		$super();
-	}
-});
+		Polygon.prototype.setupSegments.call(this);
+};
 
-var Ellipse = Class.create(Path, {
-	initialize: function($super, cx, cy, rx, ry, options) {
+function Ellipse(cx, cy, rx, ry, options) {
 		this.cx = cx; // center x
 		this.cy = cy; // center y
 		this.rx = rx; // radius x
 		this.ry = ry; // radius y
-		$super([], options);
-	},
-	offset: function(dx, dy) {
+		Path.call(this, [], options);
+};
+Ellipse.prototype = new Path();
+Ellipse.prototype.constructor = Ellipse;
+Ellipse.prototype.offset = function(dx, dy) {
 		this.cx += dx;
 		this.cy += dy;
 		return this;
-	},
-	setupSegments: function() {
+};
+Ellipse.prototype.KAPPA = 0.5522847498;
+Ellipse.prototype.setupSegments = function() {
 		this.addBezier([
 			new Point(this.cx, this.cy - this.ry),
-			new Point(this.cx + Ellipse.KAPPA * this.rx, this.cy - this.ry),
-			new Point(this.cx + this.rx, this.cy - Ellipse.KAPPA * this.ry),
+			new Point(this.cx + this.KAPPA * this.rx, this.cy - this.ry),
+			new Point(this.cx + this.rx, this.cy - this.KAPPA * this.ry),
 			new Point(this.cx + this.rx, this.cy)
 		]);
 		this.addBezier([
 			new Point(this.cx + this.rx, this.cy),
-			new Point(this.cx + this.rx, this.cy + Ellipse.KAPPA * this.ry),
-			new Point(this.cx + Ellipse.KAPPA * this.rx, this.cy + this.ry),
+			new Point(this.cx + this.rx, this.cy + this.KAPPA * this.ry),
+			new Point(this.cx + this.KAPPA * this.rx, this.cy + this.ry),
 			new Point(this.cx, this.cy + this.ry)
 		]);
 		this.addBezier([
 			new Point(this.cx, this.cy + this.ry),
-			new Point(this.cx - Ellipse.KAPPA * this.rx, this.cy + this.ry),
-			new Point(this.cx - this.rx, this.cy + Ellipse.KAPPA * this.ry),
+			new Point(this.cx - this.KAPPA * this.rx, this.cy + this.ry),
+			new Point(this.cx - this.rx, this.cy + this.KAPPA * this.ry),
 			new Point(this.cx - this.rx, this.cy)
 		]);
 		this.addBezier([
 			new Point(this.cx - this.rx, this.cy),
-			new Point(this.cx - this.rx, this.cy - Ellipse.KAPPA * this.ry),
-			new Point(this.cx - Ellipse.KAPPA * this.rx, this.cy - this.ry),
+			new Point(this.cx - this.rx, this.cy - this.KAPPA * this.ry),
+			new Point(this.cx - this.KAPPA * this.rx, this.cy - this.ry),
 			new Point(this.cx, this.cy - this.ry)
 		]);
-	}
-});
-Ellipse.KAPPA = 0.5522847498;
+};
