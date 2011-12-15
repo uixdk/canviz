@@ -57,7 +57,7 @@ var Bezier = Class.create({
 		return (this.getBB = function() {return rect;})();
 	},
 	isPointInBB: function(x, y, tolerance) {
-		if (Object.isUndefined(tolerance)) tolerance = 0;
+		if ('undefined' === typeof tolerance) tolerance = 0;
 		var bb = this.getBB();
 		if (0 < tolerance) {
 			bb = Object.clone(bb);
@@ -66,7 +66,7 @@ var Bezier = Class.create({
 		return !(x < bb.l || x > bb.r || y < bb.t || y > bb.b);
 	},
 	isPointOnBezier: function(x, y, tolerance) {
-		if (Object.isUndefined(tolerance)) tolerance = 0;
+		if ('undefined' === typeof tolerance) tolerance = 0;
 		if (!this.isPointInBB(x, y, tolerance)) return false;
 		var segments = this.chordPoints();
 		var p1 = segments[0].p;
@@ -137,7 +137,7 @@ var Bezier = Class.create({
 	// Returns two beziers resulting from splitting this bezier at t=0.5.
 	// Based on Oliver Steele's bezier.js library.
 	split: function(t) {
-		if (Object.isUndefined(t)) t = 0.5;
+		if ('undefined' === typeof t) t = 0.5;
 		var m = (0.5 == t) ? this.triangle() : this.triangleAtT(t);
 		var leftPoints  = new Array(this.order);
 		var rightPoints = new Array(this.order);
@@ -267,7 +267,7 @@ var Bezier = Class.create({
 	// Render the Bezier to a WHATWG 2D canvas context.
 	// Based on Oliver Steele's bezier.js library.
 	makePath: function (ctx, moveTo) {
-		if (Object.isUndefined(moveTo)) moveTo = true;
+		if ('undefined' === typeof moveTo) moveTo = true;
 		if (moveTo) ctx.moveTo(this.points[0].x, this.points[0].y);
 		var fn = this.pathCommands[this.order];
 		if (fn) {
@@ -300,7 +300,7 @@ var Bezier = Class.create({
 	],
 	makeDashedPath: function(ctx, dashLength, firstDistance, drawFirst) {
 		if (!firstDistance) firstDistance = dashLength;
-		if (Object.isUndefined(drawFirst)) drawFirst = true;
+		if ('undefined' === typeof drawFirst) drawFirst = true;
 		var markedEvery = this.markedEvery(dashLength, firstDistance);
 		if (drawFirst) markedEvery.times.unshift(0);
 		var drawLast = (markedEvery.times.length % 2);
@@ -370,7 +370,7 @@ var Path = Class.create({
 		return (this.getBB = function() {return rect;})();
 	},
 	isPointInBB: function(x, y, tolerance) {
-		if (Object.isUndefined(tolerance)) tolerance = 0;
+		if ('undefined' === typeof tolerance) tolerance = 0;
 		var bb = this.getBB();
 		if (0 < tolerance) {
 			bb = Object.clone(bb);
@@ -379,7 +379,7 @@ var Path = Class.create({
 		return !(x < bb.l || x > bb.r || y < bb.t || y > bb.b);
 	},
 	isPointOnPath: function(x, y, tolerance) {
-		if (Object.isUndefined(tolerance)) tolerance = 0;
+		if ('undefined' === typeof tolerance) tolerance = 0;
 		if (!this.isPointInBB(x, y, tolerance)) return false;
 		var result = false;
 		this.segments.each(function(segment) {
@@ -405,7 +405,7 @@ var Path = Class.create({
 	makeDashedPath: function(ctx, dashLength, firstDistance, drawFirst) {
 		if (0 == this.segments.length) this.setupSegments();
 		var info = {
-			drawFirst: Object.isUndefined(drawFirst) ? true : drawFirst,
+			drawFirst: ('undefined' === typeof drawFirst) ? true : drawFirst,
 			firstDistance: firstDistance || dashLength
 		};
 		this.segments.each(function(segment) {
