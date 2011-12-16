@@ -14,9 +14,9 @@ Bezier.prototype = {
 		}
 	},
 	offset: function(dx, dy) {
-		this.points.each(function(point) {
-			point.offset(dx, dy);
-		});
+		for (var i = 0; i < this.points.length; ++i) {
+		    this.points[i].offset(dx, dy);
+		}
 		this.reset();
 		return this;
 	},
@@ -25,12 +25,12 @@ Bezier.prototype = {
 		var l, t, r, b, p = this.points[0];
 		l = r = p.x;
 		t = b = p.y;
-		this.points.each(function(point) {
-			l = Math.min(l, point.x);
-			t = Math.min(t, point.y);
-			r = Math.max(r, point.x);
-			b = Math.max(b, point.y);
-		});
+		for (var i = 0; i < this.points.length; ++i) {
+			l = Math.min(l, this.points[i].x);
+			t = Math.min(t, this.points[i].y);
+			r = Math.max(r, this.points[i].x);
+			b = Math.max(b, this.points[i].y);
+		}
 		var rect = new Rect(l, t, r, b);
 		return (this.getBB = function() {return rect;})();
 	},
@@ -292,9 +292,9 @@ Bezier.prototype = {
 		if (!firstDistance) firstDistance = dotSpacing;
 		var markedEvery = this.markedEvery(dotSpacing, firstDistance);
 		if (dotSpacing == firstDistance) markedEvery.times.unshift(0);
-		markedEvery.times.each(function(t) {
-			this.pointAtT(t).makePath(ctx);
-		}.bind(this));
+		for (var i = 0; i < markedEvery.times.length; ++i) {
+			this.pointAtT(markedEvery.times[i]).makePath(ctx);
+		}
 		return markedEvery.nextDistance;
 	}
 };
