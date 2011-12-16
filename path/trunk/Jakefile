@@ -3,21 +3,35 @@ var uglify = require('uglify-js');
 
 
 desc('builds everything');
-task('default', ['libs/path.min.js'], function() {});
+task('default', ['build/path.min.js'], function() {});
 
-desc('builds a minified JS file for production');
-file('libs/path.min.js', ['libs/path.js'], function() {
-  var orig_code = fs.readFileSync('libs/path.js', 'utf8');
+desc('makes the build directory');
+directory('build');
+
+desc('builds the concatenated path library');
+file('build/path.js', ['build', 'libs/point.js', 'libs/bezier.js', 'libs/path.js', 'libs/polygon.js', 'libs/rect.js', 'libs/ellipse.js'], function() {
+  var code = [];
+  ['libs/point.js', 'libs/bezier.js', 'libs/path.js', 'libs/polygon.js', 'libs/rect.js', 'libs/ellipse.js'].forEach(function(file) {
+    code.push(fs.readFileSync(file, 'utf8'));
+  });
+  fs.writeFileSync('build/path.js', code.join("\n"), 'utf8');
+});
+
+desc('builds the minified path library for production');
+file('build/path.min.js', ['build/path.js'], function() {
+  var code = fs.readFileSync('build/path.js', 'utf8');
   var uglify_options = {
     strict_semicolons: true,
     mangle_options: {except: ['$super']},
     gen_options: {ascii_only: true},
   };
-  var final_code = uglify(orig_code, uglify_options);
-  fs.writeFileSync('libs/path.min.js', final_code, 'utf8');
+  var minified_code = uglify(code, uglify_options);
+  fs.writeFileSync('build/path.min.js', minified_code, 'utf8');
 });
 
 desc('removes everything that was built');
 task('clean', function() {
-  fs.unlink('libs/path.min.js');
+  ['build/path.js', 'build/path.min.js'].forEach(function(file) {
+    fs.unlink(file);
+  });
 });
