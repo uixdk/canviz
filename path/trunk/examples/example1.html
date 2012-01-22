@@ -10,24 +10,25 @@
 	width: 8em;
 }
 --></style>
-	<!--[if IE]><script type="text/javascript" src="excanvas/excanvas.js"></script><![endif]-->
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/prototype/1.6.0.3/prototype.js"></script>
-	<script type="text/javascript" src="../build/path.min.js"></script>
-	<script type="text/javascript" src="example1.js"></script>
 </head>
 <body>
 
 <canvas id="canvas" width="400" height="400"></canvas>
 
 <form>
-<input class="btn" id="start_stop_btn" type="button" value="" onclick="startStop()" />
-<input class="btn" id="step_btn" type="button" value="Step" onclick="animateFrame()" /><br />
-<input id="path_bboxes" type="checkbox" value="1" onclick="drawFrame()" /> <label for="path_bboxes">Path bounding boxes</label><br />
-<input id="segment_bboxes" type="checkbox" value="1" onclick="drawFrame()" /> <label for="segment_bboxes">Segment bounding boxes</label><br />
-<input id="segment_handles" type="checkbox" value="1" onclick="drawFrame()" /> <label for="segment_handles">Segment handles</label><br />
+<input class="btn" id="start_stop_btn" type="button" value="" />
+<input class="btn" id="step_btn" type="button" value="Step" /><br />
+<input id="path_bboxes" type="checkbox" value="1" /> <label for="path_bboxes">Path bounding boxes</label><br />
+<input id="segment_bboxes" type="checkbox" value="1" /> <label for="segment_bboxes">Segment bounding boxes</label><br />
+<input id="segment_handles" type="checkbox" value="1" /> <label for="segment_handles">Segment handles</label><br />
 </form>
 
 <div id="output"></div>
+
+<!--[if IE]><script type="text/javascript" src="excanvas/excanvas.js"></script><![endif]-->
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/prototype/1.6.0.3/prototype.js"></script>
+<script type="text/javascript" src="../build/path.min.js"></script>
+<script type="text/javascript" src="example1.js"></script>
 
 </body>
 </html>

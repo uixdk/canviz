@@ -1,3 +1,4 @@
+(function() {
 function newTestPaths() {
 	return [
 		new Path([
@@ -45,7 +46,7 @@ function animateFrame() {
 		drawFirst = !drawFirst;
 	}
 	drawFrame();
-	if (animating) setTimeout('animateFrame()', 50);
+	if (animating) setTimeout(animateFrame, 50);
 }
 function drawFrame() {
 	ctx.clearRect(0, 0, 400, 400);
@@ -174,7 +175,7 @@ function handleEvent(event) {
 		drawFrame();
 	}
 }
-document.observe('dom:loaded', function() {
+
 	var canvas = document.getElementById('canvas');
 	if (canvas.getContext) {
 		ctx = canvas.getContext('2d');
@@ -193,8 +194,15 @@ document.observe('dom:loaded', function() {
 		
 		document.getElementById('start_stop_btn').value = animating ? 'Stop' : 'Animate';
 		drawFrame();
+		
+		document.getElementById('start_stop_btn').onclick = startStop;
+		document.getElementById('step_btn').onclick = animateFrame;
+		var checkboxes = ['path_bboxes', 'segment_bboxes', 'segment_handles'];
+		for (var i = 0; i < checkboxes.length; ++i) {
+			document.getElementById(checkboxes[i]).onclick = drawFrame;
+		}
 	}
-});
+
 function dump(obj) {
 	var output = '';
 	output += '<fieldset><legend>' + typeof(obj) + '<\/legend>';
@@ -204,3 +212,4 @@ function dump(obj) {
 	output += '<\/fieldset>';
 	document.getElementById('output').innerHTML += output;
 }
+}());

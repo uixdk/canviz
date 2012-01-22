@@ -1,5 +1,6 @@
+(function() {
 var ctx, shapes;
-document.observe('dom:loaded', function() {
+
 	var canvas = document.getElementById('canvas');
 	if (canvas.getContext) {
 		ctx = canvas.getContext('2d');
@@ -22,9 +23,8 @@ document.observe('dom:loaded', function() {
 		var fps = 30;
 		var delay = 1000 / fps;
 		drawFrame();
-		setInterval('drawFrame()', delay);
+		setInterval(drawFrame, delay);
 	}
-});
 
 function drawFrame() {
 	var now = new Date();
@@ -49,3 +49,4 @@ function drawFrame() {
 	shapes[1].draw(ctx);
 	ctx.restore();
 }
+}());
