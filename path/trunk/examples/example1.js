@@ -58,29 +58,29 @@ function drawFrame() {
 	ctx.strokeStyle = 'rgb(233,233,233)';
 	
 	ctx.beginPath();
-	testPaths.each(function(paths) {
-		paths.each(function(path) {
-			path.makePath(ctx);
-		});
-	});
+	for (var i = 0, testPathsLength = testPaths.length; i < testPathsLength; ++i) {
+		for (var j = 0, paths = testPaths[i], pathsLength = paths.length; j < pathsLength; ++j) {
+			paths[j].makePath(ctx);
+		}
+	}
 	ctx.stroke();
 	
 	ctx.strokeStyle = 'rgb(100,100,100)';
 	
 	ctx.beginPath();
 	var before = new Date();
-	testPaths[0].each(function(path) {
-		path.makeDottedPath(ctx, spacing, firstDistance);
-	});
+	for (var i = 0, paths = testPaths[0], pathsLength = paths.length; i < pathsLength; ++i) {
+		paths[i].makeDottedPath(ctx, spacing, firstDistance);
+	}
 	var after = new Date();
 	ctx.stroke();
 	if (!animating) output += 'dotted took ' + (after.getTime() - before.getTime())/1000 + ' seconds<br/>';
 	
 	ctx.beginPath();
 	before = new Date();
-	testPaths[1].each(function(path) {
-		path.makeDashedPath(ctx, spacing, firstDistance, drawFirst);
-	});
+	for (var i = 0, paths = testPaths[1], pathsLength = paths.length; i < pathsLength; ++i) {
+		paths[i].makeDashedPath(ctx, spacing, firstDistance, drawFirst);
+	}
 	after = new Date();
 	ctx.stroke();
 	if (!animating) output += 'dashed took ' + (after.getTime() - before.getTime())/1000 + ' seconds<br/>';
@@ -88,13 +88,14 @@ function drawFrame() {
 	ctx.strokeStyle = 'rgba(255,0,0,0.5)';
 	
 	ctx.beginPath();
-	testPaths.each(function(paths) {
-		paths.each(function(path) {
+	for (var i = 0, testPathsLength = testPaths.length; i < testPathsLength; ++i) {
+		for (var j = 0, paths = testPaths[i], pathsLength = paths.length; j < pathsLength; ++j) {
+			var path = paths[j];
 			if (path.isPointOnPath(pointerX, pointerY, 5)) {
 				path.makePath(ctx);
 			}
-		});
-	});
+		}
+	}
 	ctx.stroke();
 	
 	ctx.lineWidth = 1;
@@ -104,65 +105,68 @@ function drawFrame() {
 	if ($F('path_bboxes')) {
 		ctx.strokeStyle = '#0c0';
 		ctx.beginPath();
-		testPaths.each(function(paths) {
-			paths.each(function(path) {
-				bb = Object.clone(path.getBB());
+		for (var i = 0, testPathsLength = testPaths.length; i < testPathsLength; ++i) {
+			for (var j = 0, paths = testPaths[i], pathsLength = paths.length; j < pathsLength; ++j) {
+				bb = Object.clone(paths[j].getBB());
 				bb.inset(-halfLineWidth, -halfLineWidth).makePath(ctx);
-			});
-		});
+			}
+		}
 		ctx.stroke();
 	}
 	
 	if ($F('segment_bboxes')) {
 		ctx.strokeStyle = '#c0f';
 		ctx.beginPath();
-		testPaths.each(function(paths) {
-			paths.each(function(path) {
-				path.segments.each(function(segment) {
-					bb = Object.clone(segment.getBB());
+		for (var i = 0, testPathsLength = testPaths.length; i < testPathsLength; ++i) {
+			for (var j = 0, paths = testPaths[i], pathsLength = paths.length; j < pathsLength; ++j) {
+				for (var k = 0, segments = paths[j].segments, segmentsLength = segments.length; k < segmentsLength; ++k) {
+					bb = Object.clone(segments[k].getBB());
 					bb.inset(-halfLineWidth, -halfLineWidth).makeDashedPath(ctx, 8);
-				});
-			});
-		});
+				}
+			}
+		}
 		ctx.stroke();
 	}
 	
 	if ($F('segment_handles')) {
 		ctx.strokeStyle = '#0cf';
 		ctx.beginPath();
-		testPaths.each(function(paths) {
-			paths.each(function(path) {
-				path.segments.each(function(segment) {
-					switch (segment.order) {
+		for (var i = 0, testPathsLength = testPaths.length; i < testPathsLength; ++i) {
+			for (var j = 0, paths = testPaths[i], pathsLength = paths.length; j < pathsLength; ++j) {
+				for (var k = 0, segments = paths[j].segments, segmentsLength = segments.length; k < segmentsLength; ++k) {
+					var segment = segments[k];
+					var points = segment.points;
+					var order = segment.order
+					switch (order) {
 						case 2:
 						case 3:
-							ctx.moveTo(segment.points[0].x, segment.points[0].y);
-							for (var i = 1; i < segment.order; ++i) {
-								ctx.lineTo(segment.points[i].x, segment.points[i].y);
+							ctx.moveTo(points[0].x, points[0].y);
+							for (var l = 1; l < order; ++l) {
+								ctx.lineTo(points[l].x, points[l].y);
 							}
 							break;
 						case 4:
-							ctx.moveTo(segment.points[0].x, segment.points[0].y);
-							ctx.lineTo(segment.points[1].x, segment.points[1].y);
-							ctx.moveTo(segment.points[2].x, segment.points[2].y);
-							ctx.lineTo(segment.points[3].x, segment.points[3].y);
+							ctx.moveTo(points[0].x, points[0].y);
+							ctx.lineTo(points[1].x, points[1].y);
+							ctx.moveTo(points[2].x, points[2].y);
+							ctx.lineTo(points[3].x, points[3].y);
 							break;
 					}
-				});
-			});
-		});
+				}
+			}
+		}
 		ctx.stroke();
 		ctx.lineWidth = 4;
 		ctx.beginPath();
-		testPaths.each(function(paths) {
-			paths.each(function(path) {
-				path.segments.each(function(segment) {
-					segment.points.each(function(point) {
-						point.makePath(ctx);
-					});
-				});
-			});
-		});
+		for (var i = 0, testPathsLength = testPaths.length; i < testPathsLength; ++i) {
+			for (var j = 0, paths = testPaths[i], pathsLength = paths.length; j < pathsLength; ++j) {
+				for (var k = 0, segments = paths[j], segmentsLength = segments.length; k < segmentsLength; ++k) {
+					for (var l = 0, points = segments[k].points, pointsLength = points.length; l < pointsLength; ++l) {
+						points[l].makePath(ctx);
+					}
+				}
+			}
+		}
 		ctx.stroke();
 	}
 	
@@ -184,9 +188,9 @@ function handleEvent(event) {
 		
 		testPaths[0] = newTestPaths();
 		testPaths[1] = newTestPaths();
-		testPaths[1].each(function(path) {
-			path.offset(0, 190);
-		});
+		for (var i = 0, paths = testPaths[1], pathsLength = paths.length; i < pathsLength; ++i) {
+			paths[i].offset(0, 190);
+		}
 		
 		canvasOffset = canvas.cumulativeOffset();
 		canvas.observe('mousemove', handleEvent);
@@ -198,7 +202,7 @@ function handleEvent(event) {
 		document.getElementById('start_stop_btn').onclick = startStop;
 		document.getElementById('step_btn').onclick = animateFrame;
 		var checkboxes = ['path_bboxes', 'segment_bboxes', 'segment_handles'];
-		for (var i = 0; i < checkboxes.length; ++i) {
+		for (var i = 0, checkboxesLength = checkboxesLength; i < checkboxesLength; ++i) {
 			document.getElementById(checkboxes[i]).onclick = drawFrame;
 		}
 	}
