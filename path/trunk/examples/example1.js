@@ -217,7 +217,7 @@ function handleEvent(event) {
 		document.getElementById('start_stop_btn').onclick = startStop;
 		document.getElementById('step_btn').onclick = animateFrame;
 		var checkboxes = ['path_bboxes', 'segment_bboxes', 'segment_handles'];
-		for (var i = 0, checkboxesLength = checkboxesLength; i < checkboxesLength; ++i) {
+		for (var i = 0, checkboxesLength = checkboxes.length; i < checkboxesLength; ++i) {
 			document.getElementById(checkboxes[i]).onclick = drawFrame;
 		}
 	}
