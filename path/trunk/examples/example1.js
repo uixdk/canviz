@@ -102,7 +102,7 @@ function drawFrame() {
 	
 	var bb;
 	
-	if ($F('path_bboxes')) {
+	if (document.getElementById('path_bboxes').checked) {
 		ctx.strokeStyle = '#0c0';
 		ctx.beginPath();
 		for (var i = 0, testPathsLength = testPaths.length; i < testPathsLength; ++i) {
@@ -114,7 +114,7 @@ function drawFrame() {
 		ctx.stroke();
 	}
 	
-	if ($F('segment_bboxes')) {
+	if (document.getElementById('segment_bboxes').checked) {
 		ctx.strokeStyle = '#c0f';
 		ctx.beginPath();
 		for (var i = 0, testPathsLength = testPaths.length; i < testPathsLength; ++i) {
@@ -128,7 +128,7 @@ function drawFrame() {
 		ctx.stroke();
 	}
 	
-	if ($F('segment_handles')) {
+	if (document.getElementById('segment_handles').checked) {
 		ctx.strokeStyle = '#0cf';
 		ctx.beginPath();
 		for (var i = 0, testPathsLength = testPaths.length; i < testPathsLength; ++i) {
