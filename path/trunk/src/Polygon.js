@@ -5,9 +5,9 @@ function Polygon(points, options) {
 Polygon.prototype = new Path();
 Polygon.prototype.constructor = Polygon;
 Polygon.prototype.offset = function(dx, dy) {
-		this.points.forEach(function(point) {
-			point.offset(dx, dy);
-		});
+		for (var i = 0; i < this.points.length; ++i ) {
+			this.points[i].offset(dx, dy);
+		}
 		return this;
 };
 Polygon.prototype.setupSegments = function() {

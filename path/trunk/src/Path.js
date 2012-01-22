@@ -27,23 +27,23 @@ Path.prototype = {
 	},
 	offset: function(dx, dy) {
 		if (0 == this.segments.length) this.setupSegments();
-		this.segments.forEach(function(segment) {
-			segment.offset(dx, dy);
-		});
+		for (var i = 0; i < this.segments.length; ++i) {
+			this.segments[i].offset(dx, dy);
+		}
 	},
 	getBB: function() {
 		if (0 == this.segments.length) this.setupSegments();
 		var l, t, r, b, p = this.segments[0].points[0];
 		l = r = p.x;
 		t = b = p.y;
-		this.segments.forEach(function(segment) {
-			segment.points.forEach(function(point) {
-				l = Math.min(l, point.x);
-				t = Math.min(t, point.y);
-				r = Math.max(r, point.x);
-				b = Math.max(b, point.y);
-			});
-		});
+		for (var i = 0; i < this.segments.length; ++i) {
+			for (var j = 0; j < this.segments[i].points.length; ++j) {
+				l = Math.min(l, this.segments[i].points[j].x);
+				t = Math.min(t, this.segments[i].points[j].y);
+				r = Math.max(r, this.segments[i].points[j].x);
+				b = Math.max(b, this.segments[i].points[j].y);
+			}
+		}
 		var rect = new Rect(l, t, r, b);
 		return (this.getBB = function() {return rect;})();
 	},
@@ -59,14 +59,12 @@ Path.prototype = {
 	isPointOnPath: function(x, y, tolerance) {
 		if ('undefined' === typeof tolerance) tolerance = 0;
 		if (!this.isPointInBB(x, y, tolerance)) return false;
-		var result = false;
-		this.segments.forEach(function(segment) {
-			if (segment.isPointOnBezier(x, y, tolerance)) {
-				result = true;
-				throw $break;
+		for (var i = 0; i < this.segments.length; ++i) {
+			if (this.segments[i].isPointOnBezier(x, y, tolerance)) {
+				return true;
 			}
-		});
-		return result;
+		}
+		return false;
 	},
 	isPointInPath: function(x, y) {
 		return false;
@@ -74,9 +72,9 @@ Path.prototype = {
 	// Based on Oliver Steele's bezier.js library.
 	makePath: function(ctx) {
 		if (0 == this.segments.length) this.setupSegments();
-		this.segments.forEach(function(segment, i) {
-			segment.makePath(ctx, 0 == i);
-		});
+		for (var i = 0; i < this.segments.length; ++i) {
+			this.segments[i].makePath(ctx, 0 == i);
+		}
 	},
 	makeDashedPath: function(ctx, dashLength, firstDistance, drawFirst) {
 		if (0 == this.segments.length) this.setupSegments();
@@ -84,16 +82,16 @@ Path.prototype = {
 			drawFirst: ('undefined' === typeof drawFirst) ? true : drawFirst,
 			firstDistance: firstDistance || dashLength
 		};
-		this.segments.forEach(function(segment) {
-			info = segment.makeDashedPath(ctx, dashLength, info.firstDistance, info.drawFirst);
-		});
+		for (var i = 0; i < this.segments.length; ++i) {
+			info = this.segments[i].makeDashedPath(ctx, dashLength, info.firstDistance, info.drawFirst);
+		}
 	},
 	makeDottedPath: function(ctx, dotSpacing, firstDistance) {
 		if (0 == this.segments.length) this.setupSegments();
 		if (!firstDistance) firstDistance = dotSpacing;
-		this.segments.forEach(function(segment) {
-			firstDistance = segment.makeDottedPath(ctx, dotSpacing, firstDistance);
-		});
+		for (var i = 0; i < this.segments.length; ++i ) {
+			firstDistance = this.segments[i].makeDottedPath(ctx, dotSpacing, firstDistance);
+		}
 	},
 	draw: function(ctx) {
 		ctx.save();
