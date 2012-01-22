@@ -34,16 +34,16 @@ function drawFrame() {
 	ctx.save();
 	ctx.translate(200, 200);
 	shapes[0].draw(ctx);
-	if ($F('translate_checkbox')) {
+	if (document.getElementById('translate_checkbox').checked) {
 		var dx = 10 * Math.sin(radians * 4);
 		var dy = 10 * Math.cos(radians * 4);
 		ctx.translate(dx, dy);
 	}
-	if ($F('scale_checkbox')) {
+	if (document.getElementById('scale_checkbox').checked) {
 		var scale = 1 + 0.05 * Math.cos(radians * 8);
 		ctx.scale(scale, scale);
 	}
-	if ($F('rotate_checkbox')) {
+	if (document.getElementById('rotate_checkbox').checked) {
 		ctx.rotate(radians);
 	}
 	shapes[1].draw(ctx);
