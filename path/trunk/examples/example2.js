@@ -37,10 +37,10 @@ function drawFrame() {
 	ctx.clearRect(0, 0, 800, 400);
 	ctx.save();
 	ctx.translate(150, 150);
-	shapes.each(function(shape) {
-		shape.draw(ctx);
+	for (var i = 0; i < shapes.length; ++i) {
+		shapes[i].draw(ctx);
 		ctx.translate(250, 0);
-	});
+	}
 	ctx.restore();
 }
 }());
