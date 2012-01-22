@@ -1,13 +1,12 @@
 (function() {
-var ctx, shapes;
 
 	var canvas = document.getElementById('canvas');
 	if (canvas.getContext) {
-		ctx = canvas.getContext('2d');
+		var ctx = canvas.getContext('2d');
 		ctx.lineWidth = 4;
 		ctx.lineCap = 'round';
 		
-		shapes = [
+		var shapes = [
 			new Rect(-125, -125, 125, 125, {
 				x_fill: true,
 				fillStyle: 'rgba(0, 0, 0, 0.05)',
