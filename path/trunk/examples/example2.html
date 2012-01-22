@@ -20,53 +20,7 @@ canvas {
 	<!--[if IE]><script type="text/javascript" src="excanvas/excanvas.js"></script><![endif]-->
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/prototype/1.6.0.3/prototype.js"></script>
 	<script type="text/javascript" src="../build/path.min.js"></script>
-	<script type="text/javascript"><!--
-var ctx, shapes;
-document.observe('dom:loaded', function() {
-	var canvas = $('canvas');
-	if (canvas.getContext) {
-		ctx = canvas.getContext('2d');
-		ctx.lineWidth = 4;
-		
-		shapes = [
-			new Rect(-100, -100, 100, 100),
-			new Ellipse(0, 0, 100, 100, {
-				x_fill: true,
-				fillStyle: 'rgba(0, 255, 0, 0.4)',
-				x_stroke: false
-			}),
-			new Polygon([
-				new Point(-100, 100),
-				new Point(0, 100 - 100 * Math.sqrt(3)),
-				new Point(100, 100)
-			], {
-				x_fill: true,
-				fillStyle: 'rgba(0, 0, 255, 0.4)',
-				strokeStyle: 'rgba(0, 0, 255, 0.8)',
-				lineCap: 'round'
-			})
-		];
-		shapes[0].setOptions({
-			strokeStyle: 'rgba(255, 0, 0, 0.8)',
-			x_strokeType: 'dashed',
-			x_dashLength: 20
-		});
-		
-		drawFrame();
-	}
-});
-
-function drawFrame() {
-	ctx.clearRect(0, 0, 800, 400);
-	ctx.save();
-	ctx.translate(150, 150);
-	shapes.each(function(shape) {
-		shape.draw(ctx);
-		ctx.translate(250, 0);
-	});
-	ctx.restore();
-}
-// --></script>
+	<script type="text/javascript" src="example2.js"></script>
 </head>
 <body>
 
