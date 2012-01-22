@@ -1,24 +1,26 @@
 function Path(segments, options) {
 		this.segments = segments || [];
 		this.options = {};
-		this.setOptions(Object.extend({
-			x_fill: false,
-			x_stroke: true,
-			x_strokeType: 'solid',
-			x_dashLength: 6,
-			x_dotSpacing: 4
-		}, options || {}));
+		if (options) this.setOptions(options);
 };
 Path.prototype = {
 	constructor: Path,
+	x_fill: false,
+	x_stroke: true,
+	x_strokeType: 'solid',
+	x_dashLength: 6,
+	x_dotSpacing: 4,
 	setOptions: function(options) {
-		$H(options).each(function(option) {
-			if (option.key.startsWith('x_')) {
-				this[option.key] = option.value;
+		var keys = Object.keys(options);
+		var keysLength = keys.length;
+		for (var i = 0; i < keysLength; ++i) {
+			var key = keys[i];
+			if (key.startsWith('x_')) {
+				this[key] = options[key];
 			} else {
-				this.options[option.key] = option.value;
+				this.options[key] = options[key];
 			}
-		}.bind(this));
+		}
 	},
 	setupSegments: function() {},
 	// Based on Oliver Steele's bezier.js library.
@@ -95,9 +97,12 @@ Path.prototype = {
 	},
 	draw: function(ctx) {
 		ctx.save();
-		$H(this.options).each(function(option) {
-			ctx[option.key] = option.value;
-		});
+		var keys = Object.keys(this.options);
+		var keysLength = keys.length;
+		for (var i = 0; i < keysLength; ++i) {
+			var key = keys[i];
+			ctx[key] = this.options[key];
+		}
 		if (this.x_fill) {
 			ctx.beginPath();
 			this.makePath(ctx);
