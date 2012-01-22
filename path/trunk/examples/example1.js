@@ -222,13 +222,4 @@ function handleEvent(event) {
 		}
 	}
 
-function dump(obj) {
-	var output = '';
-	output += '<fieldset><legend>' + typeof(obj) + '<\/legend>';
-	for (var elem in obj) {
-		output += '<b>' + elem + '<\/b>: ' + ('function' == typeof(obj[elem]) ? '' : obj[elem]) + ('object' == typeof(obj[elem]) ? '' : ' [' + typeof(obj[elem]) + ']') + '<br/>';
-	}
-	output += '<\/fieldset>';
-	document.getElementById('output').innerHTML += output;
-}
 }());
