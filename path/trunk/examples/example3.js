@@ -1,6 +1,6 @@
 var ctx, shapes;
 document.observe('dom:loaded', function() {
-	var canvas = $('canvas');
+	var canvas = document.getElementById('canvas');
 	if (canvas.getContext) {
 		ctx = canvas.getContext('2d');
 		ctx.lineWidth = 4;

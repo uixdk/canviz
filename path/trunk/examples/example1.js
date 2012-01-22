@@ -30,10 +30,10 @@ function newTestPaths() {
 var testPaths = [], spacing = 30, firstDistance = spacing, drawFirst = true, ctx, animating = false, pointerX = pointerY = 0, canvasOffset;
 function startStop() {
 	if (animating) {
-		$('start_stop_btn').value = 'Animate';
+		document.getElementById('start_stop_btn').value = 'Animate';
 		animating = false;
 	} else {
-		$('start_stop_btn').value = 'Stop';
+		document.getElementById('start_stop_btn').value = 'Stop';
 		animating = true;
 		animateFrame();
 	}
@@ -165,7 +165,7 @@ function drawFrame() {
 		ctx.stroke();
 	}
 	
-	if (!animating) $('output').update(output);
+	if (!animating) document.getElementById('output').innerHTML = output;
 }
 function handleEvent(event) {
 	if (event) {
@@ -175,7 +175,7 @@ function handleEvent(event) {
 	}
 }
 document.observe('dom:loaded', function() {
-	var canvas = $('canvas');
+	var canvas = document.getElementById('canvas');
 	if (canvas.getContext) {
 		ctx = canvas.getContext('2d');
 		
@@ -191,7 +191,7 @@ document.observe('dom:loaded', function() {
 		canvas.observe('mousemove', handleEvent);
 		canvas.observe('mouseout', handleEvent);
 		
-		$('start_stop_btn').value = animating ? 'Stop' : 'Animate';
+		document.getElementById('start_stop_btn').value = animating ? 'Stop' : 'Animate';
 		drawFrame();
 	}
 });
@@ -202,5 +202,5 @@ function dump(obj) {
 		output += '<b>' + elem + '<\/b>: ' + ('function' == typeof(obj[elem]) ? '' : obj[elem]) + ('object' == typeof(obj[elem]) ? '' : ' [' + typeof(obj[elem]) + ']') + '<br/>';
 	}
 	output += '<\/fieldset>';
-	$('output').innerHTML += output;
+	document.getElementById('output').innerHTML += output;
 }
