@@ -15,7 +15,7 @@ Path.prototype = {
 		var keysLength = keys.length;
 		for (var i = 0; i < keysLength; ++i) {
 			var key = keys[i];
-			if (key.startsWith('x_')) {
+			if ('x_' == key.substr(0, 2)) {
 				this[key] = options[key];
 			} else {
 				this.options[key] = options[key];
