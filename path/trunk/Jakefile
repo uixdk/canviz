@@ -9,9 +9,9 @@ desc('makes the build directory');
 directory('build');
 
 desc('builds the concatenated path library');
-file('build/path.js', ['build', 'src/forEach.js', 'src/Point.js', 'src/Bezier.js', 'src/Path.js', 'src/Polygon.js', 'src/Rect.js', 'src/Ellipse.js'], function() {
+file('build/path.js', ['build', 'src/Point.js', 'src/Bezier.js', 'src/Path.js', 'src/Polygon.js', 'src/Rect.js', 'src/Ellipse.js'], function() {
   var code = [];
-  ['src/forEach.js', 'src/Point.js', 'src/Bezier.js', 'src/Path.js', 'src/Polygon.js', 'src/Rect.js', 'src/Ellipse.js'].forEach(function(file) {
+  ['src/Point.js', 'src/Bezier.js', 'src/Path.js', 'src/Polygon.js', 'src/Rect.js', 'src/Ellipse.js'].forEach(function(file) {
     code.push(fs.readFileSync(file, 'utf8'));
   });
   fs.writeFileSync('build/path.js', code.join("\n"), 'utf8');
