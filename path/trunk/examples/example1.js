@@ -28,7 +28,7 @@ function newTestPaths() {
 		new Rect(40, 124, 170, 170)
 	];
 }
-var testPaths = [], spacing = 30, firstDistance = spacing, drawFirst = true, ctx, animating = false, pointerX = pointerY = 0, canvasOffset;
+var testPaths = [], spacing = 30, firstDistance = spacing, drawFirst = true, ctx, animating = false, pointer = {x: 0, y: 0}, canvasOffset;
 function startStop() {
 	if (animating) {
 		document.getElementById('start_stop_btn').value = 'Animate';
@@ -91,7 +91,7 @@ function drawFrame() {
 	for (var i = 0, testPathsLength = testPaths.length; i < testPathsLength; ++i) {
 		for (var j = 0, paths = testPaths[i], pathsLength = paths.length; j < pathsLength; ++j) {
 			var path = paths[j];
-			if (path.isPointOnPath(pointerX, pointerY, 5)) {
+			if (path.isPointOnPath(pointer.x, pointer.y, 5)) {
 				path.makePath(ctx);
 			}
 		}
@@ -172,10 +172,25 @@ function drawFrame() {
 	
 	if (!animating) document.getElementById('output').innerHTML = output;
 }
+function pointerPosition(event) {
+	var docElement = document.documentElement;
+	var body = document.body || {scrollLeft: 0, scrollTop: 0};
+	
+	var x = event.pageX || (event.clientX +
+		(docElement.scrollLeft || body.scrollLeft) -
+		(docElement.clientLeft || 0));
+	
+	var y = event.pageY || (event.clientY +
+		(docElement.scrollTop || body.scrollTop) -
+		(docElement.clientTop || 0));
+	
+	return {x: x, y: y};
+}
 function handleEvent(event) {
 	if (event) {
-		pointerX = event.pointerX() - canvasOffset.left;
-		pointerY = event.pointerY() - canvasOffset.top;
+		pointer = pointerPosition(event);
+		pointer.x -= canvasOffset.left;
+		pointer.y -= canvasOffset.top;
 		drawFrame();
 	}
 }
