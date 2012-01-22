@@ -50,7 +50,6 @@ function animateFrame() {
 }
 function drawFrame() {
 	ctx.clearRect(0, 0, 400, 400);
-	var output = '';
 	
 	ctx.lineWidth = 4;
 	var halfLineWidth = ctx.lineWidth / 2;
@@ -74,7 +73,6 @@ function drawFrame() {
 	}
 	var after = new Date();
 	ctx.stroke();
-	if (!animating) output += 'dotted took ' + (after.getTime() - before.getTime())/1000 + ' seconds<br/>';
 	
 	ctx.beginPath();
 	before = new Date();
@@ -83,7 +81,6 @@ function drawFrame() {
 	}
 	after = new Date();
 	ctx.stroke();
-	if (!animating) output += 'dashed took ' + (after.getTime() - before.getTime())/1000 + ' seconds<br/>';
 	
 	ctx.strokeStyle = 'rgba(255,0,0,0.5)';
 	
@@ -169,8 +166,6 @@ function drawFrame() {
 		}
 		ctx.stroke();
 	}
-	
-	if (!animating) document.getElementById('output').innerHTML = output;
 }
 function pointerPosition(event) {
 	var docElement = document.documentElement;
