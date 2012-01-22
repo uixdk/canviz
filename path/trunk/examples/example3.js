@@ -19,6 +19,10 @@
 			})
 		];
 		
+		var translateCheckbox = document.getElementById('translate_checkbox');
+		var scaleCheckbox = document.getElementById('scale_checkbox');
+		var rotateCheckbox = document.getElementById('rotate_checkbox');
+		
 		var fps = 30;
 		var delay = 1000 / fps;
 		drawFrame();
@@ -33,16 +37,16 @@ function drawFrame() {
 	ctx.save();
 	ctx.translate(200, 200);
 	shapes[0].draw(ctx);
-	if (document.getElementById('translate_checkbox').checked) {
+	if (translateCheckbox.checked) {
 		var dx = 10 * Math.sin(radians * 4);
 		var dy = 10 * Math.cos(radians * 4);
 		ctx.translate(dx, dy);
 	}
-	if (document.getElementById('scale_checkbox').checked) {
+	if (scaleCheckbox.checked) {
 		var scale = 1 + 0.05 * Math.cos(radians * 8);
 		ctx.scale(scale, scale);
 	}
-	if (document.getElementById('rotate_checkbox').checked) {
+	if (rotateCheckbox.checked) {
 		ctx.rotate(radians);
 	}
 	shapes[1].draw(ctx);
