@@ -1,7 +1,7 @@
 MIT-style software license for Path library
 ===========================================
 
-Copyright (c) 2007-2009 Ryan Schmidt
+Copyright (c) 2007-2012 Ryan Schmidt
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
