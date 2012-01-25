@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "rimraf": "~1.0.9",
     "uglify-js": "~1.2.2"
   },
   "engines": {
