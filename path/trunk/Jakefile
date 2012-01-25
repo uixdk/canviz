@@ -22,7 +22,6 @@ file('build/path.min.js', ['build/path.js'], function() {
   var code = fs.readFileSync('build/path.js', 'utf8');
   var uglify_options = {
     strict_semicolons: true,
-    mangle_options: {except: ['$super']},
     gen_options: {ascii_only: true},
   };
   var minified_code = uglify(code, uglify_options);
