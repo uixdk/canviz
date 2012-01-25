@@ -4,7 +4,10 @@ var uglify = require('uglify-js');
 
 
 desc('builds everything');
-task('default', ['build/path.min.js'], function() {});
+task('default', ['path'], function() {});
+
+desc('builds path');
+task('path', ['build/path.min.js'], function() {});
 
 desc('makes the build directory');
 directory('build');
