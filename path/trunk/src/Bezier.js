@@ -14,7 +14,8 @@ Bezier.prototype = {
 		}
 	},
 	offset: function(dx, dy) {
-		for (var i = 0; i < this.points.length; ++i) {
+		var pointsLength = this.points.length;
+		for (var i = 0; i < pointsLength; ++i) {
 		    this.points[i].offset(dx, dy);
 		}
 		this.reset();
@@ -22,14 +23,16 @@ Bezier.prototype = {
 	},
 	getBB: function() {
 		if (!this.order) return undefined;
-		var l, t, r, b, p = this.points[0];
-		l = r = p.x;
-		t = b = p.y;
-		for (var i = 0; i < this.points.length; ++i) {
-			l = Math.min(l, this.points[i].x);
-			t = Math.min(t, this.points[i].y);
-			r = Math.max(r, this.points[i].x);
-			b = Math.max(b, this.points[i].y);
+		var l, t, r, b, point = this.points[0];
+		l = r = point.x;
+		t = b = point.y;
+		var pointsLength = this.points.length;
+		for (var i = 1; i < pointsLength; ++i) {
+			point = this.points[i];
+			l = Math.min(l, point.x);
+			t = Math.min(t, point.y);
+			r = Math.max(r, point.x);
+			b = Math.max(b, point.y);
 		}
 		var rect = new Rect(l, t, r, b);
 		return (this.getBB = function() {return rect;})();
@@ -47,9 +50,10 @@ Bezier.prototype = {
 		if ('undefined' === typeof tolerance) tolerance = 0;
 		if (!this.isPointInBB(x, y, tolerance)) return false;
 		var segments = this.chordPoints();
+		var segmentsLength = segments.length;
 		var p1 = segments[0].p;
 		var p2, x1, y1, x2, y2, bb, twice_area, base, height;
-		for (var i = 1; i < segments.length; ++i) {
+		for (var i = 1; i < segmentsLength; ++i) {
 			p2 = segments[i].p;
 			x1 = p1.x;
 			y1 = p1.y;
@@ -69,7 +73,8 @@ Bezier.prototype = {
 	// Based on Oliver Steele's bezier.js library.
 	controlPolygonLength: function() {
 		var len = 0;
-		for (var i = 1; i < this.order; ++i) {
+		var order = this.order;
+		for (var i = 1; i < order; ++i) {
 			len += this.points[i - 1].distanceFrom(this.points[i]);
 		}
 		return (this.controlPolygonLength = function() {return len;})();
@@ -83,9 +88,10 @@ Bezier.prototype = {
 	triangle: function() {
 		var upper = this.points;
 		var m = [upper];
-		for (var i = 1; i < this.order; ++i) {
+		var order = this.order;
+		for (var i = 1; i < order; ++i) {
 			var lower = [];
-			for (var j = 0; j < this.order - i; ++j) {
+			for (var j = 0; j < order - i; ++j) {
 				var c0 = upper[j];
 				var c1 = upper[j + 1];
 				lower[j] = new Point((c0.x + c1.x) / 2, (c0.y + c1.y) / 2);
@@ -100,9 +106,10 @@ Bezier.prototype = {
 		var s = 1 - t;
 		var upper = this.points;
 		var m = [upper];
-		for (var i = 1; i < this.order; ++i) {
+		var order = this.order;
+		for (var i = 1; i < order; ++i) {
 			var lower = [];
-			for (var j = 0; j < this.order - i; ++j) {
+			for (var j = 0; j < order - i; ++j) {
 				var c0 = upper[j];
 				var c1 = upper[j + 1];
 				lower[j] = new Point(c0.x * s + c1.x * t, c0.y * s + c1.y * t);
@@ -117,11 +124,12 @@ Bezier.prototype = {
 	split: function(t) {
 		if ('undefined' === typeof t) t = 0.5;
 		var m = (0.5 == t) ? this.triangle() : this.triangleAtT(t);
-		var leftPoints  = new Array(this.order);
-		var rightPoints = new Array(this.order);
-		for (var i = 0; i < this.order; ++i) {
+		var order = this.order;
+		var leftPoints = [];
+		var rightPoints = [];
+		for (var i = 0; i < order; ++i) {
 			leftPoints[i]  = m[i][0];
-			rightPoints[i] = m[this.order - 1 - i][i];
+			rightPoints[i] = m[order - 1 - i][i];
 		}
 		return {left: new Bezier(leftPoints), right: new Bezier(rightPoints)};
 	},
@@ -154,12 +162,13 @@ Bezier.prototype = {
 	markedEvery: function(distance, firstDistance) {
 		var nextDistance = firstDistance || distance;
 		var segments = this.chordPoints();
+		var segmentsLength = segments.length;
 		var times = [];
 		var t = 0; // time
 		var dt; // delta t
 		var segment;
 		var remainingDistance;
-		for (var i = 1; i < segments.length; ++i) {
+		for (var i = 1; i < segmentsLength; ++i) {
 			segment = segments[i];
 			segment.length = segment.p.distanceFrom(segments[i - 1].p);
 			if (0 == segment.length) {
@@ -192,9 +201,10 @@ Bezier.prototype = {
 		// side-effects (denormalizes) p0, for convienence
 		function interpolate(p0, p1) {
 			p0.push(0);
-			var p = new Array(p0.length);
+			var p = [];
 			p[0] = p0[0];
-			for (var i = 0; i < p1.length; ++i) {
+			var p1Length = p1.length;
+			for (var i = 0; i < p1Length; ++i) {
 				p[i + 1] = p0[i + 1] + p1[i] - p0[i];
 			}
 			return p;
@@ -203,8 +213,9 @@ Bezier.prototype = {
 		// the polynomial elements of +ns+, and returns its TOP
 		function collapse(ns) {
 			while (ns.length > 1) {
-				var ps = new Array(ns.length-1);
-				for (var i = 0; i < ns.length - 1; ++i) {
+				var nsLengthMinus1 = ns.length - 1;
+				var ps = [];
+				for (var i = 0; i < nsLengthMinus1; ++i) {
 					ps[i] = interpolate(ns[i], ns[i + 1]);
 				}
 				ns = ps;
@@ -250,9 +261,11 @@ Bezier.prototype = {
 		var fn = this.pathCommands[this.order];
 		if (fn) {
 			var coords = [];
-			for (var i = 1 == this.order ? 0 : 1; i < this.points.length; ++i) {
-				coords.push(this.points[i].x);
-				coords.push(this.points[i].y);
+			var pointsLength = this.points.length;
+			for (var i = 1 == this.order ? 0 : 1; i < pointsLength; ++i) {
+				var point = this.points[i];
+				coords.push(point.x);
+				coords.push(point.y);
 			}
 			fn.apply(ctx, coords);
 		}
@@ -283,7 +296,8 @@ Bezier.prototype = {
 		if (drawFirst) markedEvery.times.unshift(0);
 		var drawLast = (markedEvery.times.length % 2);
 		if (drawLast) markedEvery.times.push(1);
-		for (var i = 1; i < markedEvery.times.length; i += 2) {
+		var markedEveryTimesLength = markedEvery.times.length;
+		for (var i = 1; i < markedEveryTimesLength; i += 2) {
 			this.mid(markedEvery.times[i - 1], markedEvery.times[i]).makePath(ctx);
 		}
 		return {firstDistance: markedEvery.nextDistance, drawFirst: drawLast};
@@ -292,7 +306,8 @@ Bezier.prototype = {
 		if (!firstDistance) firstDistance = dotSpacing;
 		var markedEvery = this.markedEvery(dotSpacing, firstDistance);
 		if (dotSpacing == firstDistance) markedEvery.times.unshift(0);
-		for (var i = 0; i < markedEvery.times.length; ++i) {
+		var markedEveryTimesLength = markedEvery.times.length;
+		for (var i = 0; i < markedEveryTimesLength; ++i) {
 			this.pointAtT(markedEvery.times[i]).makePath(ctx);
 		}
 		return markedEvery.nextDistance;

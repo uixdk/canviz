@@ -29,7 +29,8 @@ Path.prototype = {
 	},
 	offset: function(dx, dy) {
 		if (0 == this.segments.length) this.setupSegments();
-		for (var i = 0; i < this.segments.length; ++i) {
+		var segmentsLength = this.segments.length;
+		for (var i = 0; i < segmentsLength; ++i) {
 			this.segments[i].offset(dx, dy);
 		}
 	},
@@ -38,12 +39,16 @@ Path.prototype = {
 		var l, t, r, b, p = this.segments[0].points[0];
 		l = r = p.x;
 		t = b = p.y;
-		for (var i = 0; i < this.segments.length; ++i) {
-			for (var j = 0; j < this.segments[i].points.length; ++j) {
-				l = Math.min(l, this.segments[i].points[j].x);
-				t = Math.min(t, this.segments[i].points[j].y);
-				r = Math.max(r, this.segments[i].points[j].x);
-				b = Math.max(b, this.segments[i].points[j].y);
+		var segmentsLength = this.segments.length;
+		for (var i = 0; i < segmentsLength; ++i) {
+			var points = this.segments[i].points;
+			var pointsLength = points.length;
+			for (var j = 0; j < pointsLength; ++j) {
+				var point = this.segments[i].points[j];
+				l = Math.min(l, point.x);
+				t = Math.min(t, point.y);
+				r = Math.max(r, point.x);
+				b = Math.max(b, point.y);
 			}
 		}
 		var rect = new Rect(l, t, r, b);
@@ -61,7 +66,8 @@ Path.prototype = {
 	isPointOnPath: function(x, y, tolerance) {
 		if ('undefined' === typeof tolerance) tolerance = 0;
 		if (!this.isPointInBB(x, y, tolerance)) return false;
-		for (var i = 0; i < this.segments.length; ++i) {
+		var segmentsLength = this.segments.length;
+		for (var i = 0; i < segmentsLength; ++i) {
 			if (this.segments[i].isPointOnBezier(x, y, tolerance)) {
 				return true;
 			}
@@ -74,7 +80,8 @@ Path.prototype = {
 	// Based on Oliver Steele's bezier.js library.
 	makePath: function(ctx) {
 		if (0 == this.segments.length) this.setupSegments();
-		for (var i = 0; i < this.segments.length; ++i) {
+		var segmentsLength = this.segments.length;
+		for (var i = 0; i < segmentsLength; ++i) {
 			this.segments[i].makePath(ctx, 0 == i);
 		}
 	},
@@ -84,14 +91,16 @@ Path.prototype = {
 			drawFirst: ('undefined' === typeof drawFirst) ? true : drawFirst,
 			firstDistance: firstDistance || dashLength
 		};
-		for (var i = 0; i < this.segments.length; ++i) {
+		var segmentsLength = this.segments.length;
+		for (var i = 0; i < segmentsLength; ++i) {
 			info = this.segments[i].makeDashedPath(ctx, dashLength, info.firstDistance, info.drawFirst);
 		}
 	},
 	makeDottedPath: function(ctx, dotSpacing, firstDistance) {
 		if (0 == this.segments.length) this.setupSegments();
 		if (!firstDistance) firstDistance = dotSpacing;
-		for (var i = 0; i < this.segments.length; ++i ) {
+		var segmentsLength = this.segments.length;
+		for (var i = 0; i < segmentsLength; ++i ) {
 			firstDistance = this.segments[i].makeDottedPath(ctx, dotSpacing, firstDistance);
 		}
 	},

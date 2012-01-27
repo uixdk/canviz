@@ -5,13 +5,15 @@ function Polygon(points, options) {
 Polygon.prototype = new Path();
 Polygon.prototype.constructor = Polygon;
 Polygon.prototype.offset = function(dx, dy) {
-		for (var i = 0; i < this.points.length; ++i ) {
+		var pointsLength = this.points.length;
+		for (var i = 0; i < pointsLength; ++i ) {
 			this.points[i].offset(dx, dy);
 		}
 		return this;
 };
 Polygon.prototype.setupSegments = function() {
-		for (var i = 0; i < this.points.length; ++i) {
+		var pointsLength = this.points.length;
+		for (var i = 0; i < pointsLength; ++i) {
 			var next = i + 1;
 			if (this.points.length == next) next = 0;
 			this.addBezier([
