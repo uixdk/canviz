@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>ContentLoaded - TEST CASE</title>
+<meta name="author" content="Diego Perini" />
+<meta name="copyright" content="Copyright (c) 2007-2010, Diego Perini" />
+
+<!-- body background set to lime -->
+<style type="text/css">
+/*<![CDATA[*/
+
+	body { background-color: lime; }
+
+/*]]>*/
+</style>
+
+<!-- load contentloaded script -->
+<script type="text/javascript" src="contentloaded.js">
+</script>
+
+<!-- body background set to green -->
+<script type="text/javascript">
+//<![CDATA[
+
+	var $tt = (new Date).getTime();
+	function timeElapsed(t) { return ((new Date()).getTime() - t); }
+
+	contentLoaded(window,
+		function (e) {
+			document.body.style.backgroundColor = 'green';
+			window.status =
+			window.defaultStatus =
+				' * ' + (e.type || e) + ' ' +
+				' - ' + (e.eventType ? e.eventType : 'native') +
+				' in ' + timeElapsed($tt) + ' ms.';
+		}
+	);
+
+//]]>
+</script>
+</head>
+<body>
+
+<h1>ContentLoaded - TEST CASE</h1>
+
+<p>UPDATED: 20101020 Version 1.2 (completely abandoned UA sniffing)</p>
+
+<h3>When can I use/start manipulating the DOM with Javascript ?</h3>
+
+<p>Quick answer: as soon as the DOM is ready ! But when is that and how are we notified ?</p>
+
+<p>The objective of this test is to evaluate the detection reliability of this method.</p>
+<p>In this specific case we are interested in determining when all the nodes in the<br />
+requested page have been loaded and parsed in the DOM and available to scripts.</p>
+<p>The fact that images exists or not in the page shouldn't affect this test.</p>
+
+<p>The test case executes these steps, in sequence, at different times:</p>
+
+<ol>
+ <li>INLINE STYLE is applied and the BODY background color is set to "lime"</li>
+ <li>Ending BODY SCRIPT is executed and the background color is set to "red"</li>
+ <li>ContentLoaded function is fired and the background color is set to "green"</li>
+</ol>
+
+<h3>ContentLoaded tests</h3>
+
+<ul>
+<li><a href="contentloaded.html">Example in a static HTML page</a></li>
+<li><a href="contentloaded.php">Example in a dynamic PHP page</a></li>
+</ul>
+
+<p>The page should have a "green" background color after being loaded completely.<br />
+If that is not the case then something went wrong in my script or in your browser.</p>
+
+<hr />
+
+<h4>This filler ensure exceeding the default 4Kb output caching of Apache.</h4>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+
+<hr />
+
+<h4>This filler ensure exceeding the default 4Kb output caching of Apache.</h4>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+
+<hr />
+
+<h4>This filler ensure exceeding the default 4Kb output caching of Apache.</h4>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+
+<hr />
+
+<h4>This filler ensure exceeding the default 4Kb output caching of Apache.</h4>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+<span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span><span>test test test</span>
+
+<hr />
+
+<!-- body background set to red -->
+<script type="text/javascript">
+//<![CDATA[
+
+	document.body.style.backgroundColor = 'red';
+
+//]]>
+</script>
+
+<script type="text/javascript" src="http://www.google-analytics.com/urchin.js"></script>
+<script type="text/javascript">_uacct = "UA-5181392-6";urchinTracker();</script>
+
+</body>
+</html>
