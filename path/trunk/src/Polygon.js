@@ -1,3 +1,5 @@
+#include 'Path.js'
+
 function Polygon(points, options) {
 		this.points = points || [];
 		Path.call(this, [], options);

@@ -1,3 +1,6 @@
+#include 'Path.js'
+#include 'Point.js'
+
 function Ellipse(cx, cy, rx, ry, options) {
 		this.cx = cx; // center x
 		this.cy = cy; // center y
