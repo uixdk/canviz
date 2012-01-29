@@ -1,4 +1,5 @@
 var fs = require('fs');
+var path = require('path');
 var rimraf = require('rimraf');
 var uglify = require('uglify-js');
 
@@ -12,13 +13,36 @@ task('path', ['build/path.min.js'], function() {});
 desc('makes the build directory');
 directory('build');
 
+var preprocessFile = (function() {
+  var includeFiles = [];
+  return function(file) {
+    if (includeFiles.indexOf(file) !== -1) return '';
+    includeFiles.push(file);
+    var lines = fs.readFileSync(file, 'utf8').split("\n");
+    lines.forEach(function(line, i) {
+      var matches = /^\s*#include\s*(?:'([^']+)'|"([^"]+)")\s*$/.exec(line);
+      if (matches) {
+        var includeFile = path.join(path.dirname(file), matches[1]);
+        lines[i] = preprocessFile(includeFile);
+      }
+    });
+    return lines.join("\n");
+  }
+}());
+
 desc('builds the concatenated path library');
-file('build/path.js', ['build', 'src/Point.js', 'src/Bezier.js', 'src/Path.js', 'src/Polygon.js', 'src/Rect.js', 'src/Ellipse.js'], function() {
-  var code = [];
-  ['src/Point.js', 'src/Bezier.js', 'src/Path.js', 'src/Polygon.js', 'src/Rect.js', 'src/Ellipse.js'].forEach(function(file) {
-    code.push(fs.readFileSync(file, 'utf8'));
-  });
-  fs.writeFileSync('build/path.js', code.join("\n"), 'utf8');
+file('build/path.js', [
+  'build',
+  'src/all.js',
+  'src/Bezier.js',
+  'src/Ellipse.js',
+  'src/Path.js',
+  'src/Point.js',
+  'src/Polygon.js',
+  'src/Rect.js',
+], function() {
+  var code = preprocessFile('src/all.js');
+  fs.writeFileSync('build/path.js', code, 'utf8');
 });
 
 desc('builds the minified path library for production');

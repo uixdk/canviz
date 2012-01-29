@@ -1,3 +1,6 @@
+#include 'Bezier.js'
+#include 'Rect.js'
+
 function Path(segments, options) {
 		this.segments = segments || [];
 		this.options = {};

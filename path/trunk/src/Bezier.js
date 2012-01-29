@@ -1,3 +1,6 @@
+#include 'Point.js'
+#include 'Rect.js'
+
 function Bezier(points) {
 		this.points = points;
 		this.order = points.length;
