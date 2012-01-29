@@ -13,9 +13,9 @@ task('path', ['build/path.min.js'], function() {});
 desc('makes the build directory');
 directory('build');
 
-var preprocessFile = (function() {
+function preprocessFile(file) {
   var includeFiles = [];
-  return function(file) {
+  function _preprocessFile(file) {
     if (includeFiles.indexOf(file) !== -1) return '';
     includeFiles.push(file);
     var lines = fs.readFileSync(file, 'utf8').split("\n");
@@ -23,12 +23,13 @@ var preprocessFile = (function() {
       var matches = /^\s*#include\s*(?:'([^']+)'|"([^"]+)")\s*$/.exec(line);
       if (matches) {
         var includeFile = path.join(path.dirname(file), matches[1]);
-        lines[i] = preprocessFile(includeFile);
+        lines[i] = _preprocessFile(includeFile);
       }
     });
     return lines.join("\n");
   }
-}());
+  return _preprocessFile(file);
+}
 
 desc('builds the concatenated path library');
 file('build/path.js', [
