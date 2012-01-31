@@ -1,5 +1,5 @@
-#include 'Point.js'
-#include 'Rect.js'
+//#include 'Point.js'
+//#include 'Rect.js'
 
 function Bezier(points) {
 		this.points = points;

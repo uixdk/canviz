@@ -19,7 +19,7 @@ function preprocessFile(file) {
     includeFiles.push(file);
     var lines = fs.readFileSync(file, 'utf8').split("\n");
     for (var i = 0; i < lines.length; ++i) {
-      var matches = /^\s*#include\s*(?:'([^']+)'|"([^"]+)")\s*$/.exec(lines[i]);
+      var matches = /^\s*\/\/#include\s*(?:'([^']+)'|"([^"]+)")\s*$/.exec(lines[i]);
       if (matches) {
         var includeFile = path.join(path.dirname(file), matches[1]);
         if (includeFiles.indexOf(includeFile) === -1) {

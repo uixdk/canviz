@@ -1,5 +1,5 @@
-#include 'Point.js'
-#include 'Polygon.js'
+//#include 'Point.js'
+//#include 'Polygon.js'
 
 function Rect(l, t, r, b, options) {
 		this.l = l;
