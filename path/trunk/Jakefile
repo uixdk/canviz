@@ -16,16 +16,19 @@ directory('build');
 function preprocessFile(file) {
   var includeFiles = [];
   function _preprocessFile(file) {
-    if (includeFiles.indexOf(file) !== -1) return '';
     includeFiles.push(file);
     var lines = fs.readFileSync(file, 'utf8').split("\n");
-    lines.forEach(function(line, i) {
-      var matches = /^\s*#include\s*(?:'([^']+)'|"([^"]+)")\s*$/.exec(line);
+    for (var i = 0; i < lines.length; ++i) {
+      var matches = /^\s*#include\s*(?:'([^']+)'|"([^"]+)")\s*$/.exec(lines[i]);
       if (matches) {
         var includeFile = path.join(path.dirname(file), matches[1]);
-        lines[i] = _preprocessFile(includeFile);
+        if (includeFiles.indexOf(includeFile) === -1) {
+          lines[i] = _preprocessFile(includeFile);
+        } else {
+          lines.splice(i--, 1);
+        }
       }
-    });
+    }
     return lines.join("\n");
   }
   return _preprocessFile(file);
