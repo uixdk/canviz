@@ -1,4 +1,4 @@
-#include 'Path.js'
+//#include 'Path.js'
 
 function Polygon(points, options) {
 		this.points = points || [];
