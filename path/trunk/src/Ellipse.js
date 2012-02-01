@@ -15,30 +15,31 @@ Ellipse.prototype.offset = function(dx, dy) {
 		this.cy += dy;
 		return this;
 };
-Ellipse.prototype.KAPPA = 0.5522847498;
+
+var KAPPA = 0.5522847498;
 Ellipse.prototype.setupSegments = function() {
 		this.addBezier([
 			new Point(this.cx, this.cy - this.ry),
-			new Point(this.cx + this.KAPPA * this.rx, this.cy - this.ry),
-			new Point(this.cx + this.rx, this.cy - this.KAPPA * this.ry),
+			new Point(this.cx + KAPPA * this.rx, this.cy - this.ry),
+			new Point(this.cx + this.rx, this.cy - KAPPA * this.ry),
 			new Point(this.cx + this.rx, this.cy)
 		]);
 		this.addBezier([
 			new Point(this.cx + this.rx, this.cy),
-			new Point(this.cx + this.rx, this.cy + this.KAPPA * this.ry),
-			new Point(this.cx + this.KAPPA * this.rx, this.cy + this.ry),
+			new Point(this.cx + this.rx, this.cy + KAPPA * this.ry),
+			new Point(this.cx + KAPPA * this.rx, this.cy + this.ry),
 			new Point(this.cx, this.cy + this.ry)
 		]);
 		this.addBezier([
 			new Point(this.cx, this.cy + this.ry),
-			new Point(this.cx - this.KAPPA * this.rx, this.cy + this.ry),
-			new Point(this.cx - this.rx, this.cy + this.KAPPA * this.ry),
+			new Point(this.cx - KAPPA * this.rx, this.cy + this.ry),
+			new Point(this.cx - this.rx, this.cy + KAPPA * this.ry),
 			new Point(this.cx - this.rx, this.cy)
 		]);
 		this.addBezier([
 			new Point(this.cx - this.rx, this.cy),
-			new Point(this.cx - this.rx, this.cy - this.KAPPA * this.ry),
-			new Point(this.cx - this.KAPPA * this.rx, this.cy - this.ry),
+			new Point(this.cx - this.rx, this.cy - KAPPA * this.ry),
+			new Point(this.cx - KAPPA * this.rx, this.cy - this.ry),
 			new Point(this.cx, this.cy - this.ry)
 		]);
 };
