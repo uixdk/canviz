@@ -1,7 +1,7 @@
 //#include 'Bezier.js'
 //#include 'Rect.js'
 
-function Path(segments, options) {
+var Path = exports.Path = function(segments, options) {
 		this.segments = segments || [];
 		this.options = {};
 		if (options) this.setOptions(options);

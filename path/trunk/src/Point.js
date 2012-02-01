@@ -1,4 +1,4 @@
-function Point(x, y) {
+var Point = exports.Point = function(x, y) {
 		this.x = x;
 		this.y = y;
 };
