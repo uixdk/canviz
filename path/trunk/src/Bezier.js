@@ -1,7 +1,7 @@
 //#include 'Point.js'
 //#include 'Rect.js'
 
-function Bezier(points) {
+var Bezier = exports.Bezier = function(points) {
 		this.points = points;
 		this.order = points.length;
 };

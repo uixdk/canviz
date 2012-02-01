@@ -1,6 +1,6 @@
 //#include 'Path.js'
 
-function Polygon(points, options) {
+var Polygon = exports.Polygon = function(points, options) {
 		this.points = points || [];
 		Path.call(this, [], options);
 };
