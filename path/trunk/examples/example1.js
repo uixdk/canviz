@@ -204,7 +204,7 @@ contentLoaded(window, function() {
 			paths[i].offset(0, 190);
 		}
 		
-		canvasOffset = canvas.cumulativeOffset();
+		canvasOffset = $(canvas).cumulativeOffset();
 		canvas.observe('mousemove', handleEvent);
 		canvas.observe('mouseout', handleEvent);
 		
