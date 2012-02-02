@@ -66,19 +66,15 @@ function drawFrame() {
 	ctx.strokeStyle = 'rgb(100,100,100)';
 	
 	ctx.beginPath();
-	var before = new Date();
 	for (var i = 0, paths = testPaths[0], pathsLength = paths.length; i < pathsLength; ++i) {
 		paths[i].makeDottedPath(ctx, spacing, firstDistance);
 	}
-	var after = new Date();
 	ctx.stroke();
 	
 	ctx.beginPath();
-	before = new Date();
 	for (var i = 0, paths = testPaths[1], pathsLength = paths.length; i < pathsLength; ++i) {
 		paths[i].makeDashedPath(ctx, spacing, firstDistance, drawFirst);
 	}
-	after = new Date();
 	ctx.stroke();
 	
 	ctx.strokeStyle = 'rgba(255,0,0,0.5)';
