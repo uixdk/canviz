@@ -1,12 +1,14 @@
-(function() {
+var ctx, shapes, translateCheckbox, scaleCheckbox, rotateCheckbox;
 
+contentLoaded(window, function() {
+  setTimeout(function() {
 	var canvas = document.getElementById('canvas');
 	if (canvas.getContext) {
-		var ctx = canvas.getContext('2d');
+		ctx = canvas.getContext('2d');
 		ctx.lineWidth = 4;
 		ctx.lineCap = 'round';
 		
-		var shapes = [
+		shapes = [
 			new Rect(-125, -125, 125, 125, {
 				x_fill: true,
 				fillStyle: 'rgba(0, 0, 0, 0.05)',
@@ -19,15 +21,17 @@
 			})
 		];
 		
-		var translateCheckbox = document.getElementById('translate_checkbox');
-		var scaleCheckbox = document.getElementById('scale_checkbox');
-		var rotateCheckbox = document.getElementById('rotate_checkbox');
+		translateCheckbox = document.getElementById('translate_checkbox');
+		scaleCheckbox = document.getElementById('scale_checkbox');
+		rotateCheckbox = document.getElementById('rotate_checkbox');
 		
 		var fps = 30;
 		var delay = 1000 / fps;
 		drawFrame();
 		setInterval(drawFrame, delay);
 	}
+	}, 0);
+});
 
 function drawFrame() {
 	var now = new Date();
@@ -52,4 +56,3 @@ function drawFrame() {
 	shapes[1].draw(ctx);
 	ctx.restore();
 }
-}());
