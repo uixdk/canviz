@@ -1,6 +1,7 @@
-(function() {
 var ctx, shapes;
 
+contentLoaded(window, function() {
+  setTimeout(function() {
 	var canvas = document.getElementById('canvas');
 	if (canvas.getContext) {
 		ctx = canvas.getContext('2d');
@@ -32,6 +33,8 @@ var ctx, shapes;
 		
 		drawFrame();
 	}
+  }, 0);
+});
 
 function drawFrame() {
 	ctx.clearRect(0, 0, 800, 400);
@@ -43,4 +46,3 @@ function drawFrame() {
 	}
 	ctx.restore();
 }
-}());

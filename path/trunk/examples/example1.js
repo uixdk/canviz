@@ -1,4 +1,3 @@
-(function() {
 function newTestPaths() {
 	return [
 		new Path([
@@ -190,6 +189,9 @@ function handleEvent(event) {
 	}
 }
 
+contentLoaded(window, function() {
+  setTimeout(function() {
+
 	var canvas = document.getElementById('canvas');
 	if (canvas.getContext) {
 		ctx = canvas.getContext('2d');
@@ -216,5 +218,5 @@ function handleEvent(event) {
 			document.getElementById(checkboxes[i]).onclick = drawFrame;
 		}
 	}
-
-}());
+  }, 0);
+});
