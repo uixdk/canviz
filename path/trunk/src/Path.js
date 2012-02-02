@@ -1,4 +1,5 @@
 //#include 'Bezier.js'
+//#include 'objectKeys.js'
 //#include 'Rect.js'
 
 var Path = exports.Path = function(segments, options) {
@@ -14,7 +15,7 @@ Path.prototype = {
 	x_dashLength: 6,
 	x_dotSpacing: 4,
 	setOptions: function(options) {
-		var keys = Object.keys(options);
+		var keys = objectKeys(options);
 		var keysLength = keys.length;
 		for (var i = 0; i < keysLength; ++i) {
 			var key = keys[i];
@@ -109,7 +110,7 @@ Path.prototype = {
 	},
 	draw: function(ctx) {
 		ctx.save();
-		var keys = Object.keys(this.options);
+		var keys = objectKeys(this.options);
 		var keysLength = keys.length;
 		for (var i = 0; i < keysLength; ++i) {
 			var key = keys[i];
