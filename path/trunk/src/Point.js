@@ -16,6 +16,6 @@ Point.prototype = {
 	},
 	makePath: function(ctx) {
 		ctx.moveTo(this.x, this.y);
-		ctx.lineTo(this.x + 0.001, this.y);
+		ctx.lineTo(this.x + .05, this.y);
 	}
 };

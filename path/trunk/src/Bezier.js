@@ -280,7 +280,7 @@ Bezier.prototype = {
 		null,
 		// This will have an effect if there's a line thickness or end cap.
 		function(x, y) {
-			this.lineTo(x + 0.001, y);
+			this.lineTo(x + .05, y);
 		},
 		function(x, y) {
 			this.lineTo(x, y);
