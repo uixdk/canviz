@@ -16,10 +16,11 @@ Requirements
 
 Path does not require the use of any external libraries, but does require a web
 browser that supports the HTML5 canvas element. Most modern browsers, including
-Internet Explorer 9, do. To support IE 8 and earlier, you can use a
+Internet Explorer 9 and later, do. To support IE 8 and earlier, you can use a
 compatibility library like [ExplorerCanvas][2] (which uses IE's built-in
 [VML][3] capabilities) or [FlashCanvas][4] (which requires the [Adobe Flash
-Player plugin][5]). A version of ExplorerCanvas is included in the Path distribution, and the examples use it.
+Player plugin][5]). A version of ExplorerCanvas is included in the Path
+distribution, and the examples use it.
 
 License
 -------
