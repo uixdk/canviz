@@ -1,6 +1,5 @@
 var fs = require('fs');
 var path = require('path');
-var rimraf = require('rimraf');
 var uglify = require('uglify-js');
 
 
@@ -62,5 +61,5 @@ file('build/path.min.js', ['build/path.js'], function() {
 
 desc('removes everything that was built');
 task('clean', function() {
-  rimraf('build', complete);
-}, {async: true});
+  jake.rmRf('build');
+});
