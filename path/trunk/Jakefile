@@ -62,5 +62,5 @@ file('build/path.min.js', ['build/path.js'], function() {
 
 desc('removes everything that was built');
 task('clean', function() {
-  rimraf('build', {gently: true}, complete);
+  rimraf('build', complete);
 }, {async: true});
