@@ -1,3 +1,5 @@
+var Rect = Path.Rect;
+
 var ctx, shapes, translateCheckbox, scaleCheckbox, rotateCheckbox;
 
 contentLoaded(window, function() {

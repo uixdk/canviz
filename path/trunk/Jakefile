@@ -1,5 +1,5 @@
+var browserify = require('browserify');
 var fs = require('fs');
-var path = require('path');
 var uglify = require('uglify-js');
 
 
@@ -12,51 +12,40 @@ task('path', ['build/path.min.js'], function() {});
 desc('makes the build directory');
 directory('build');
 
-function preprocessFile(file) {
-  var includeFiles = [];
-  function _preprocessFile(file) {
-    includeFiles.push(file);
-    var lines = fs.readFileSync(file, 'utf8').split("\n");
-    for (var i = 0; i < lines.length; ++i) {
-      var matches = /^\s*\/\/#include\s*(?:'([^']+)'|"([^"]+)")\s*$/.exec(lines[i]);
-      if (matches) {
-        var includeFile = path.join(path.dirname(file), matches[1]);
-        if (includeFiles.indexOf(includeFile) === -1) {
-          lines[i] = _preprocessFile(includeFile);
-        } else {
-          lines.splice(i--, 1);
-        }
-      }
-    }
-    return lines.join("\n");
-  }
-  return _preprocessFile(file);
-}
-
-desc('builds the concatenated path library');
+desc('builds the concatenated path library for development');
 file('build/path.js', [
   'build',
-  'src/all.js',
+  'index.js',
   'src/Bezier.js',
   'src/Ellipse.js',
+  'src/objectKeys.js',
   'src/Path.js',
   'src/Point.js',
   'src/Polygon.js',
   'src/Rect.js',
 ], function() {
-  var code = preprocessFile('src/all.js');
-  fs.writeFileSync('build/path.js', code, 'utf8');
-});
+  var b = browserify('./index.js');
+  b.bundle({standalone: 'Path'}, function(err, code) {
+    if (err) console.error(err);
+    else fs.writeFileSync('build/path.js', code, 'utf8');
+    complete();
+  });
+}, {async: true});
 
 desc('builds the minified path library for production');
 file('build/path.min.js', ['build/path.js'], function() {
-  var code = fs.readFileSync('build/path.js', 'utf8');
-  var uglify_options = {
-    strict_semicolons: true,
-    gen_options: {ascii_only: true},
+  var options = {
+    compress: {
+      unsafe: true
+    },
+    output: {
+      ascii_only: true,
+      semicolons: false
+    },
+    warnings: true
   };
-  var minified_code = uglify(code, uglify_options);
-  fs.writeFileSync('build/path.min.js', minified_code, 'utf8');
+  var code = uglify.minify('build/path.js', options).code;
+  fs.writeFileSync('build/path.min.js', code, 'utf8');
 });
 
 desc('removes everything that was built');

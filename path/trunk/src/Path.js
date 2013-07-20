@@ -1,12 +1,11 @@
-//#include 'Bezier.js'
-//#include 'objectKeys.js'
-//#include 'Rect.js'
-
-var Path = exports.Path = function(segments, options) {
+// Constructor
+function Path(segments, options) {
 		this.segments = segments || [];
 		this.options = {};
 		if (options) this.setOptions(options);
-};
+}
+
+// Prototype
 Path.prototype = {
 	constructor: Path,
 	x_fill: false,
@@ -144,3 +143,11 @@ Path.prototype = {
 		ctx.restore();
 	}
 };
+
+// Exports
+module.exports = Path;
+
+// Dependencies
+var Bezier = require('./Bezier.js');
+var objectKeys = require('./objectKeys.js');
+var Rect = require('./Rect.js');

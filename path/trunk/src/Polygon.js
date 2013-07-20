@@ -1,10 +1,14 @@
-//#include 'Path.js'
-
-var Polygon = exports.Polygon = function(points, options) {
+// Constructor
+function Polygon(points, options) {
 		this.points = points || [];
 		Path.call(this, [], options);
-};
+}
+
+// Parent
+var Path = require('./Path.js');
 Polygon.prototype = new Path();
+
+// Prototype
 Polygon.prototype.constructor = Polygon;
 Polygon.prototype.offset = function(dx, dy) {
 		var pointsLength = this.points.length;
@@ -24,3 +28,6 @@ Polygon.prototype.setupSegments = function() {
 			]);
 		}
 };
+
+// Exports
+module.exports = Polygon;

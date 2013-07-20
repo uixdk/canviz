@@ -1,3 +1,8 @@
+var Ellipse = Path.Ellipse,
+  Point = Path.Point,
+  Polygon = Path.Polygon,
+  Rect = Path.Rect;
+
 var ctx, shapes;
 
 contentLoaded(window, function() {
