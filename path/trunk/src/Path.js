@@ -1,5 +1,6 @@
 // Constructor
 function Path(segments, options) {
+  if (!(this instanceof Path)) return new Path(segments, options);
 		this.segments = segments || [];
 		this.options = {};
 		if (options) this.setOptions(options);
