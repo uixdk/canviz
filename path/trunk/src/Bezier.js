@@ -1,5 +1,6 @@
 // Constructor
 function Bezier(points) {
+  if (!(this instanceof Bezier)) return new Bezier(points);
 		this.points = points;
 		this.order = points.length;
 }

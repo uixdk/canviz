@@ -1,5 +1,6 @@
 // Constructor
 function Ellipse(cx, cy, rx, ry, options) {
+  if (!(this instanceof Ellipse)) return new Ellipse(cx, cy, rx, ry, options);
 		this.cx = cx; // center x
 		this.cy = cy; // center y
 		this.rx = rx; // radius x

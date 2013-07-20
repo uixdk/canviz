@@ -1,5 +1,6 @@
 // Constructor
 function Rect(l, t, r, b, options) {
+  if (!(this instanceof Rect)) return new Rect(l, t, r, b, options);
 		this.l = l;
 		this.t = t;
 		this.r = r;

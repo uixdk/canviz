@@ -1,5 +1,6 @@
 // Constructor
 function Polygon(points, options) {
+  if (!(this instanceof Polygon)) return new Polygon(points, options);
 		this.points = points || [];
 		Path.call(this, [], options);
 }
