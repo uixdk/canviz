@@ -29,7 +29,7 @@ Path.prototype = {
   setupSegments: function () {},
   // Based on Oliver Steele's bezier.js library.
   addBezier: function (pointsOrBezier) {
-    this.segments.push(pointsOrBezier instanceof Array ? new Bezier(pointsOrBezier) : pointsOrBezier);
+    this.segments.push(pointsOrBezier instanceof Array ? Bezier(pointsOrBezier) : pointsOrBezier);
   },
   offset: function (dx, dy) {
     if (0 == this.segments.length) this.setupSegments();
@@ -55,7 +55,7 @@ Path.prototype = {
         b = Math.max(b, point.y);
       }
     }
-    var rect = new Rect(l, t, r, b);
+    var rect = Rect(l, t, r, b);
     return (this.getBB = function () {return rect;})();
   },
   isPointInBB: function (x, y, tolerance) {

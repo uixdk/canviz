@@ -7,7 +7,7 @@ function Polygon(points, options) {
 
 // Parent
 var Path = require('./Path.js');
-Polygon.prototype = new Path();
+Polygon.prototype = Path();
 
 // Prototype
 Polygon.prototype.constructor = Polygon;
