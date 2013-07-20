@@ -10,7 +10,7 @@ function Rect(l, t, r, b, options) {
 
 // Parent
 var Polygon = require('./Polygon.js');
-Rect.prototype = new Polygon();
+Rect.prototype = Polygon();
 
 // Prototype
 Rect.prototype.constructor = Rect;
@@ -44,10 +44,10 @@ Rect.prototype.setupSegments = function () {
   var w = this.getWidth();
   var h = this.getHeight();
   this.points = [
-    new Point(this.l, this.t),
-    new Point(this.l + w, this.t),
-    new Point(this.l + w, this.t + h),
-    new Point(this.l, this.t + h)
+    Point(this.l, this.t),
+    Point(this.l + w, this.t),
+    Point(this.l + w, this.t + h),
+    Point(this.l, this.t + h)
   ];
   Polygon.prototype.setupSegments.call(this);
 };

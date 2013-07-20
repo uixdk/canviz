@@ -38,7 +38,7 @@ Bezier.prototype = {
       r = Math.max(r, point.x);
       b = Math.max(b, point.y);
     }
-    var rect = new Rect(l, t, r, b);
+    var rect = Rect(l, t, r, b);
     return (this.getBB = function () {return rect;})();
   },
   isPointInBB: function (x, y, tolerance) {
@@ -63,7 +63,7 @@ Bezier.prototype = {
       y1 = p1.y;
       x2 = p2.x;
       y2 = p2.y;
-      bb = new Rect(x1, y1, x2, y2);
+      bb = Rect(x1, y1, x2, y2);
       if (bb.isPointInBB(x, y, tolerance)) {
         twiceArea = Math.abs(x1 * y2 + x2 * y + x * y1 - x2 * y1 - x * y2 - x1 * y);
         base = p1.distanceFrom(p2);
@@ -98,7 +98,7 @@ Bezier.prototype = {
       for (var j = 0; j < order - i; ++j) {
         var c0 = upper[j];
         var c1 = upper[j + 1];
-        lower[j] = new Point((c0.x + c1.x) / 2, (c0.y + c1.y) / 2);
+        lower[j] = Point((c0.x + c1.x) / 2, (c0.y + c1.y) / 2);
       }
       m.push(lower);
       upper = lower;
@@ -116,7 +116,7 @@ Bezier.prototype = {
       for (var j = 0; j < order - i; ++j) {
         var c0 = upper[j];
         var c1 = upper[j + 1];
-        lower[j] = new Point(c0.x * s + c1.x * t, c0.y * s + c1.y * t);
+        lower[j] = Point(c0.x * s + c1.x * t, c0.y * s + c1.y * t);
       }
       m.push(lower);
       upper = lower;
@@ -135,7 +135,7 @@ Bezier.prototype = {
       leftPoints[i]  = m[i][0];
       rightPoints[i] = m[order - 1 - i][i];
     }
-    return {left: new Bezier(leftPoints), right: new Bezier(rightPoints)};
+    return {left: Bezier(leftPoints), right: Bezier(rightPoints)};
   },
   // Returns a bezier which is the portion of this bezier from t1 to t2.
   // Thanks to Peter Zin on comp.graphics.algorithms.
@@ -255,7 +255,7 @@ Bezier.prototype = {
       x = x * t + cx[i];
       y = y * t + cy[i];
     }
-    return new Point(x, y);
+    return Point(x, y);
   },
   // Render the Bezier to a WHATWG 2D canvas context.
   // Based on Oliver Steele's bezier.js library.
