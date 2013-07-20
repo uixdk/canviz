@@ -56,7 +56,7 @@ Bezier.prototype = {
 		var segments = this.chordPoints();
 		var segmentsLength = segments.length;
 		var p1 = segments[0].p;
-		var p2, x1, y1, x2, y2, bb, twice_area, base, height;
+		var p2, x1, y1, x2, y2, bb, twiceArea, base, height;
 		for (var i = 1; i < segmentsLength; ++i) {
 			p2 = segments[i].p;
 			x1 = p1.x;
@@ -65,9 +65,9 @@ Bezier.prototype = {
 			y2 = p2.y;
 			bb = new Rect(x1, y1, x2, y2);
 			if (bb.isPointInBB(x, y, tolerance)) {
-				twice_area = Math.abs(x1 * y2 + x2 * y + x * y1 - x2 * y1 - x * y2 - x1 * y);
+				twiceArea = Math.abs(x1 * y2 + x2 * y + x * y1 - x2 * y1 - x * y2 - x1 * y);
 				base = p1.distanceFrom(p2);
-				height = twice_area / base;
+				height = twiceArea / base;
 				if (height <= tolerance) return true;
 			}
 			p1 = p2;
