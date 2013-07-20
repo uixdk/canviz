@@ -1,3 +1,8 @@
+var Bezier = Path.Bezier,
+  Ellipse = Path.Ellipse,
+  Point = Path.Point,
+  Rect = Path.Rect;
+
 function newTestPaths() {
 	return [
 		new Path([

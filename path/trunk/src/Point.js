@@ -1,7 +1,10 @@
-var Point = exports.Point = function(x, y) {
+// Constructor
+function Point(x, y) {
 		this.x = x;
 		this.y = y;
-};
+}
+
+// Prototype
 Point.prototype = {
 	constructor: Point,
 	offset: function(dx, dy) {
@@ -19,3 +22,6 @@ Point.prototype = {
 		ctx.lineTo(this.x + .05, this.y);
 	}
 };
+
+// Exports
+module.exports = Point;

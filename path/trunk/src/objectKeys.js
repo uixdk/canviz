@@ -4,10 +4,10 @@
 // be ok for our purposes.
 // https://developer.mozilla.org/en/ECMAScript_DontEnum_attribute#JScript_DontEnum_Bug
 
-var objectKeys = ('undefined' !== typeof Object.keys) ? Object.keys : (function() {
+module.exports = Object.keys || (function () {
   var hasOwnProperty = Object.prototype.hasOwnProperty;
   
-  return function(object) {
+  return function objectKeys(object) {
     var keys = [];
     for (var name in object) {
       if (hasOwnProperty.call(object, name)) {
@@ -16,4 +16,4 @@ var objectKeys = ('undefined' !== typeof Object.keys) ? Object.keys : (function(
     }
     return keys;
   };
-}());
+})();

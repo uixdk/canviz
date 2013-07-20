@@ -1,14 +1,17 @@
-//#include 'Point.js'
-//#include 'Polygon.js'
-
-var Rect = exports.Rect = function(l, t, r, b, options) {
+// Constructor
+function Rect(l, t, r, b, options) {
 		this.l = l;
 		this.t = t;
 		this.r = r;
 		this.b = b;
 		Polygon.call(this, [], options);
-};
+}
+
+// Parent
+var Polygon = require('./Polygon.js');
 Rect.prototype = new Polygon();
+
+// Prototype
 Rect.prototype.constructor = Rect;
 Rect.prototype.offset = function(dx, dy) {
 		this.l += dx;
@@ -47,3 +50,9 @@ Rect.prototype.setupSegments = function() {
 		];
 		Polygon.prototype.setupSegments.call(this);
 };
+
+// Exports
+module.exports = Rect;
+
+// Dependencies
+var Point = require('./Point.js');

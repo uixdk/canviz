@@ -1,10 +1,10 @@
-//#include 'Point.js'
-//#include 'Rect.js'
-
-var Bezier = exports.Bezier = function(points) {
+// Constructor
+function Bezier(points) {
 		this.points = points;
 		this.order = points.length;
-};
+}
+
+// Prototype
 Bezier.prototype = {
 	constructor: Bezier,
 	reset: function() {
@@ -316,3 +316,10 @@ Bezier.prototype = {
 		return markedEvery.nextDistance;
 	}
 };
+
+// Exports
+module.exports = Bezier;
+
+// Dependencies
+var Point = require('./Point.js');
+var Rect = require('./Rect.js');
