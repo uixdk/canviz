@@ -12,6 +12,9 @@ function Ellipse(cx, cy, rx, ry, options) {
 var Path = require('./Path.js');
 Ellipse.prototype = Path();
 
+// Constants
+var KAPPA = 0.5522847498;
+
 // Prototype
 Ellipse.prototype.constructor = Ellipse;
 Ellipse.prototype.offset = function (dx, dy) {
@@ -19,8 +22,6 @@ Ellipse.prototype.offset = function (dx, dy) {
   this.cy += dy;
   return this;
 };
-
-var KAPPA = 0.5522847498;
 Ellipse.prototype.setupSegments = function () {
   this.addBezier([
     Point(this.cx, this.cy - this.ry),
