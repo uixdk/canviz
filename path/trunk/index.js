@@ -1,3 +1,4 @@
+// Require Path first to load the circular dependencies in the right order
 var Path = module.exports = require('./src/Path.js');
 
 Path.Bezier = require('./src/Bezier.js');
