@@ -23,29 +23,29 @@
 r260 / 2009-05-19
 =================
 
-* Added Polygon class
+* Add Polygon class
 
 r158 / 2008-10-27
 =================
 
-* Added Rect class
+* Add Rect class
 
 r61 / 2007-03-14
 ================
 
-* Added Ellipse class
+* Add Ellipse class
 
 r50 / 2007-03-12
 ================
 
-* Renamed dashed-beziers to path
+* Rename dashed-beziers to path
 
 r46 / 2007-03-11
 ================
 
-* Added Path class
+* Add Path class
 
 r45 / 2007-03-11
 ================
 
-* Committed initial version of dashed-beziers with Bezier and Point classes
+* Initial version of dashed-beziers with Bezier and Point classes
