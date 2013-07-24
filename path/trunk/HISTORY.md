@@ -2,7 +2,7 @@
 ==================
 
 * Remove PrototypeJS requirement
-* Provide a single global Path variable; other classes can be accessed as Path.Bezier, Path.Ellipse, Path.Point, Path.Polygon, Path.Rect
+* Provide a single global Path variable; other classes can be accessed as Path.Bezier, Path.Ellipse, Path.Point, Path.Polygon, and Path.Rect
 * Classes can now be instantiated with or without `new`
 * Separate each class into its own NodeJS-style module in its own source file
 * Use npm for dependencies
@@ -11,6 +11,7 @@
 * Build a minified path.min.js using UglifyJS
 * Rework examples
 * Update included excanvas to version 0003
+* Convert documentation files to Markdown format
 
 0.1 / 2011-12-10
 ================
