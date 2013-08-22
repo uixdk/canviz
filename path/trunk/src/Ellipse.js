@@ -1,3 +1,6 @@
+// Constants
+var KAPPA = 0.5522847498;
+
 // Constructor
 function Ellipse(cx, cy, rx, ry, options) {
   if (!(this instanceof Ellipse)) return new Ellipse(cx, cy, rx, ry, options);
@@ -11,9 +14,6 @@ function Ellipse(cx, cy, rx, ry, options) {
 // Parent
 var Path = require('./Path.js');
 Ellipse.prototype = Path();
-
-// Constants
-var KAPPA = 0.5522847498;
 
 // Prototype
 Ellipse.prototype.constructor = Ellipse;
