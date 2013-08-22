@@ -1,3 +1,6 @@
+// Constants
+var undefined;
+
 // Constructor
 function Path(segments, options) {
   if (!(this instanceof Path)) return new Path(segments, options);
@@ -59,7 +62,7 @@ Path.prototype = {
     return (this.getBB = function () {return rect;})();
   },
   isPointInBB: function (x, y, tolerance) {
-    if ('undefined' === typeof tolerance) tolerance = 0;
+    if (tolerance === undefined) tolerance = 0;
     var bb = this.getBB();
     if (0 < tolerance) {
       bb = Object.clone(bb);
@@ -68,7 +71,7 @@ Path.prototype = {
     return !(x < bb.l || x > bb.r || y < bb.t || y > bb.b);
   },
   isPointOnPath: function (x, y, tolerance) {
-    if ('undefined' === typeof tolerance) tolerance = 0;
+    if (tolerance === undefined) tolerance = 0;
     if (!this.isPointInBB(x, y, tolerance)) return false;
     var segmentsLength = this.segments.length;
     for (var i = 0; i < segmentsLength; ++i) {
@@ -92,7 +95,7 @@ Path.prototype = {
   makeDashedPath: function (ctx, dashLength, firstDistance, drawFirst) {
     if (0 == this.segments.length) this.setupSegments();
     var info = {
-      drawFirst: ('undefined' === typeof drawFirst) ? true : drawFirst,
+      drawFirst: (drawFirst === undefined) || drawFirst,
       firstDistance: firstDistance || dashLength
     };
     var segmentsLength = this.segments.length;

@@ -1,3 +1,6 @@
+// Constants
+var undefined;
+
 // Constructor
 function Bezier(points) {
   if (!(this instanceof Bezier)) return new Bezier(points);
@@ -26,7 +29,7 @@ Bezier.prototype = {
     return this;
   },
   getBB: function () {
-    if (!this.order) return undefined;
+    if (!this.order) return;
     var l, t, r, b, point = this.points[0];
     l = r = point.x;
     t = b = point.y;
@@ -42,7 +45,7 @@ Bezier.prototype = {
     return (this.getBB = function () {return rect;})();
   },
   isPointInBB: function (x, y, tolerance) {
-    if ('undefined' === typeof tolerance) tolerance = 0;
+    if (tolerance === undefined) tolerance = 0;
     var bb = this.getBB();
     if (0 < tolerance) {
       bb = Object.clone(bb);
@@ -51,7 +54,7 @@ Bezier.prototype = {
     return !(x < bb.l || x > bb.r || y < bb.t || y > bb.b);
   },
   isPointOnBezier: function (x, y, tolerance) {
-    if ('undefined' === typeof tolerance) tolerance = 0;
+    if (tolerance === undefined) tolerance = 0;
     if (!this.isPointInBB(x, y, tolerance)) return false;
     var segments = this.chordPoints();
     var segmentsLength = segments.length;
@@ -126,7 +129,7 @@ Bezier.prototype = {
   // Returns two beziers resulting from splitting this bezier at t=0.5.
   // Based on Oliver Steele's bezier.js library.
   split: function (t) {
-    if ('undefined' === typeof t) t = 0.5;
+    if (t === undefined) t = 0.5;
     var m = (0.5 == t) ? this.triangle() : this.triangleAtT(t);
     var order = this.order;
     var leftPoints = [];
@@ -260,7 +263,7 @@ Bezier.prototype = {
   // Render the Bezier to a WHATWG 2D canvas context.
   // Based on Oliver Steele's bezier.js library.
   makePath: function (ctx, moveTo) {
-    if ('undefined' === typeof moveTo) moveTo = true;
+    if (moveTo === undefined) moveTo = true;
     if (moveTo) ctx.moveTo(this.points[0].x, this.points[0].y);
     var fn = this.pathCommands[this.order];
     if (fn) {
@@ -295,7 +298,7 @@ Bezier.prototype = {
   ],
   makeDashedPath: function (ctx, dashLength, firstDistance, drawFirst) {
     if (!firstDistance) firstDistance = dashLength;
-    if ('undefined' === typeof drawFirst) drawFirst = true;
+    if (drawFirst === undefined) drawFirst = true;
     var markedEvery = this.markedEvery(dashLength, firstDistance);
     if (drawFirst) markedEvery.times.unshift(0);
     var drawLast = (markedEvery.times.length % 2);
