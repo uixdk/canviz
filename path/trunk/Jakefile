@@ -16,6 +16,7 @@ desc('builds the concatenated path library for development');
 file('build/path.js', [
   'build',
   'index.js',
+  'Jakefile',
   'src/Bezier.js',
   'src/Ellipse.js',
   'src/objectKeys.js',
