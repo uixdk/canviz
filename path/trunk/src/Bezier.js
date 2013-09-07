@@ -268,8 +268,7 @@ Bezier.prototype = {
       var pointsLength = this.points.length;
       for (var i = 1 == this.order ? 0 : 1; i < pointsLength; ++i) {
         var point = this.points[i];
-        coords.push(point.x);
-        coords.push(point.y);
+        coords.push(point.x, point.y);
       }
       fn.apply(ctx, coords);
     }
